@@ -4,25 +4,25 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  --bg:         #03080f;
-  --bg-panel:   #06101a;
-  --bg-surface: #091622;
-  --bg-card:    #0b1c2c;
-  --border:     #1a3a52;
-  --border-hi:  #2a5a7a;
-  --text:       #8ab8d0;
-  --text-hi:    #c8e8f8;
-  --text-dim:   #3a6070;
-  --amber:      #ffaa00;
-  --amber-dim:  rgba(255,170,0,0.12);
-  --green:      #00cc55;
-  --green-dim:  rgba(0,204,85,0.12);
-  --red:        #ff2200;
-  --red-dim:    rgba(255,34,0,0.12);
-  --cyan:       #00ccdd;
-  --ok:         #00cc55;
-  --mid:        #ffaa00;
-  --bad:        #ff2200;
+  --bg:         #080e14;
+  --bg-panel:   #0c1520;
+  --bg-surface: #101c28;
+  --bg-card:    #111e2c;
+  --border:     #1e3248;
+  --border-hi:  #2a4460;
+  --text:       #7090a8;
+  --text-hi:    #a8c4d8;
+  --text-dim:   #3a5060;
+  --amber:      #c08840;
+  --amber-dim:  rgba(192,136,64,0.1);
+  --green:      #3a9060;
+  --green-dim:  rgba(58,144,96,0.1);
+  --red:        #a04030;
+  --red-dim:    rgba(160,64,48,0.12);
+  --cyan:       #3a8090;
+  --ok:         #3a9060;
+  --mid:        #c08840;
+  --bad:        #a04030;
 }
 
 * { box-sizing: border-box; }
@@ -35,7 +35,7 @@ body {
   min-height: 100vh;
 }
 
-/* Subtle scanline texture */
+/* Very subtle scanline texture */
 body::before {
   content: "";
   position: fixed;
@@ -43,9 +43,9 @@ body::before {
   background: repeating-linear-gradient(
     0deg,
     transparent,
-    transparent 2px,
-    rgba(0,0,0,0.08) 2px,
-    rgba(0,0,0,0.08) 4px
+    transparent 3px,
+    rgba(0,0,0,0.04) 3px,
+    rgba(0,0,0,0.04) 4px
   );
   pointer-events: none;
   z-index: 0;
@@ -67,7 +67,7 @@ body::before {
   border-top: 3px solid var(--amber);
   padding: 20px 24px 16px;
   position: relative;
-  box-shadow: 0 0 40px rgba(255,170,0,0.06), inset 0 0 60px rgba(0,0,0,0.4);
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.3);
 }
 
 /* Corner marks */
@@ -451,33 +451,33 @@ body::before {
 }
 
 /* Quality tint — dark cockpit style */
-.quality-tint.penalty-0 { background: #001a0a; border-color: #004020; }
-.quality-tint.penalty-0 .metric-value { color: #00e060; }
-.quality-tint.penalty-0 .metric-label { color: #00803a; border-color: #004020; }
+.quality-tint.penalty-0 { background: #0d1c14; border-color: #1a3828; }
+.quality-tint.penalty-0 .metric-value { color: #5aaa78; }
+.quality-tint.penalty-0 .metric-label { color: #2e6040; border-color: #1a3828; }
 
-.quality-tint.penalty-1 { background: #001508; border-color: #003018; }
-.quality-tint.penalty-1 .metric-value { color: #00c050; }
-.quality-tint.penalty-1 .metric-label { color: #006030; }
+.quality-tint.penalty-1 { background: #0c1a12; border-color: #183020; }
+.quality-tint.penalty-1 .metric-value { color: #4a9868; }
+.quality-tint.penalty-1 .metric-label { color: #285838; }
 
-.quality-tint.penalty-2 { background: #161000; border-color: #3a2a00; }
-.quality-tint.penalty-2 .metric-value { color: #e0a000; }
-.quality-tint.penalty-2 .metric-label { color: #806000; border-color: #3a2a00; }
+.quality-tint.penalty-2 { background: #181408; border-color: #302808; }
+.quality-tint.penalty-2 .metric-value { color: #a88040; }
+.quality-tint.penalty-2 .metric-label { color: #604818; border-color: #302808; }
 
-.quality-tint.penalty-3 { background: #1a0e00; border-color: #4a2800; }
+.quality-tint.penalty-3 { background: #1a1408; border-color: #382808; }
 .quality-tint.penalty-3 .metric-value { color: var(--amber); }
-.quality-tint.penalty-3 .metric-label { color: #905000; border-color: #4a2800; }
+.quality-tint.penalty-3 .metric-label { color: #705020; border-color: #382808; }
 
-.quality-tint.penalty-4 { background: #1a0800; border-color: #5a1800; }
-.quality-tint.penalty-4 .metric-value { color: #ff7020; }
-.quality-tint.penalty-4 .metric-label { color: #a03010; border-color: #5a1800; }
+.quality-tint.penalty-4 { background: #1a1008; border-color: #401808; }
+.quality-tint.penalty-4 .metric-value { color: #a86030; }
+.quality-tint.penalty-4 .metric-label { color: #703010; border-color: #401808; }
 
-.quality-tint.penalty-5 { background: #1a0200; border-color: var(--bad); }
+.quality-tint.penalty-5 { background: #180c08; border-color: #481008; }
 .quality-tint.penalty-5 .metric-value { color: var(--bad); }
-.quality-tint.penalty-5 .metric-label { color: #c02010; border-color: #800000; }
+.quality-tint.penalty-5 .metric-label { color: #802018; border-color: #480c08; }
 
-.quality-tint.penalty-6 { background: #0e0018; border-color: #6000a0; }
-.quality-tint.penalty-6 .metric-value { color: #cc44ff; }
-.quality-tint.penalty-6 .metric-label { color: #7020a0; border-color: #4000700; }
+.quality-tint.penalty-6 { background: #140c18; border-color: #301840; }
+.quality-tint.penalty-6 .metric-value { color: #8050a0; }
+.quality-tint.penalty-6 .metric-label { color: #503068; border-color: #301840; }
 
 /* ── SLOTS ────────────────────────────────────────────────────── */
 
