@@ -416,6 +416,9 @@ body::before {
   background: var(--bg-surface);
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 72px;
 }
 
 .metric-label {
@@ -432,6 +435,7 @@ body::before {
 }
 
 .metric-value {
+  flex: 1;
   display: block;
   font-family: "Share Tech Mono", monospace;
   font-size: 1.05rem;
