@@ -4,25 +4,25 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  --bg:         #f2f4f6;
-  --bg-panel:   #ffffff;
-  --bg-surface: #f8f9fb;
-  --bg-card:    #ffffff;
-  --border:     #c8d4de;
-  --border-hi:  #8aacca;
-  --text:       #3a5060;
-  --text-hi:    #0d1e2c;
-  --text-dim:   #7a9aaa;
-  --amber:      #e09000;
-  --amber-dim:  rgba(224,144,0,0.1);
-  --green:      #008844;
-  --green-dim:  rgba(0,136,68,0.08);
-  --red:        #cc2200;
-  --red-dim:    rgba(204,34,0,0.07);
-  --cyan:       #006888;
-  --ok:         #008844;
-  --mid:        #e09000;
-  --bad:        #cc2200;
+  --bg:         #dce3ea;
+  --bg-panel:   #eaeff4;
+  --bg-surface: #e4eaf0;
+  --bg-card:    #edf1f6;
+  --border:     #a8bccf;
+  --border-hi:  #6090b8;
+  --text:       #2a4258;
+  --text-hi:    #080f18;
+  --text-dim:   #6080a0;
+  --amber:      #d48000;
+  --amber-dim:  rgba(212,128,0,0.12);
+  --green:      #007a38;
+  --green-dim:  rgba(0,122,56,0.1);
+  --red:        #c01800;
+  --red-dim:    rgba(192,24,0,0.1);
+  --cyan:       #005a7a;
+  --ok:         #007a38;
+  --mid:        #d48000;
+  --bad:        #c01800;
 }
 
 * { box-sizing: border-box; }
@@ -448,33 +448,33 @@ body::before {
 }
 
 /* Quality tint — dark cockpit style */
-.quality-tint.penalty-0 { background: #e8f8ee; border-color: #90d0a8; }
-.quality-tint.penalty-0 .metric-value { color: #006830; }
-.quality-tint.penalty-0 .metric-label { background: #d0f0de; border-color: #90d0a8; color: #005028; }
+.quality-tint.penalty-0 { background: #b8e8cc; border-color: #50b87a; }
+.quality-tint.penalty-0 .metric-value { color: #005825; }
+.quality-tint.penalty-0 .metric-label { background: #9ad8b4; border-color: #50b87a; color: #004018; }
 
-.quality-tint.penalty-1 { background: #eef8f2; border-color: #a8d8bc; }
-.quality-tint.penalty-1 .metric-value { color: #007838; }
-.quality-tint.penalty-1 .metric-label { background: #d8f0e4; border-color: #a8d8bc; color: #005830; }
+.quality-tint.penalty-1 { background: #c8eed8; border-color: #70c890; }
+.quality-tint.penalty-1 .metric-value { color: #006830; }
+.quality-tint.penalty-1 .metric-label { background: #b0e0c8; border-color: #70c890; color: #004820; }
 
-.quality-tint.penalty-2 { background: #fdf8e8; border-color: #e0cc80; }
-.quality-tint.penalty-2 .metric-value { color: #806000; }
-.quality-tint.penalty-2 .metric-label { background: #f8f0c8; border-color: #e0cc80; color: #604800; }
+.quality-tint.penalty-2 { background: #f0dea0; border-color: #c8a830; }
+.quality-tint.penalty-2 .metric-value { color: #704800; }
+.quality-tint.penalty-2 .metric-label { background: #e8d080; border-color: #c8a830; color: #503000; }
 
-.quality-tint.penalty-3 { background: #fef6e0; border-color: #e8c060; }
-.quality-tint.penalty-3 .metric-value { color: var(--amber); }
-.quality-tint.penalty-3 .metric-label { background: #faecc0; border-color: #e8c060; color: #705000; }
+.quality-tint.penalty-3 { background: #f0d080; border-color: #d09000; }
+.quality-tint.penalty-3 .metric-value { color: #603800; }
+.quality-tint.penalty-3 .metric-label { background: #e8c060; border-color: #d09000; color: #482800; }
 
-.quality-tint.penalty-4 { background: #fef0e8; border-color: #e09070; }
-.quality-tint.penalty-4 .metric-value { color: #c05020; }
-.quality-tint.penalty-4 .metric-label { background: #faded0; border-color: #e09070; color: #902810; }
+.quality-tint.penalty-4 { background: #f0b888; border-color: #d06030; }
+.quality-tint.penalty-4 .metric-value { color: #601800; }
+.quality-tint.penalty-4 .metric-label { background: #e8a070; border-color: #d06030; color: #481000; }
 
-.quality-tint.penalty-5 { background: #fdecea; border-color: #e08080; }
-.quality-tint.penalty-5 .metric-value { color: var(--bad); }
-.quality-tint.penalty-5 .metric-label { background: #f8d0cc; border-color: #e08080; color: #901818; }
+.quality-tint.penalty-5 { background: #e89080; border-color: #c03018; }
+.quality-tint.penalty-5 .metric-value { color: #500000; }
+.quality-tint.penalty-5 .metric-label { background: #d87060; border-color: #c03018; color: #380000; }
 
-.quality-tint.penalty-6 { background: #f8eaff; border-color: #c090e0; }
-.quality-tint.penalty-6 .metric-value { color: #7020a0; }
-.quality-tint.penalty-6 .metric-label { background: #eed8f8; border-color: #c090e0; color: #601888; }
+.quality-tint.penalty-6 { background: #d8a8e8; border-color: #9040c0; }
+.quality-tint.penalty-6 .metric-value { color: #380058; }
+.quality-tint.penalty-6 .metric-label { background: #c890d8; border-color: #9040c0; color: #280040; }
 
 /* ── SLOTS ────────────────────────────────────────────────────── */
 
