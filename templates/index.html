@@ -1,0 +1,130 @@
+﻿<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plongée Dunkerque - 7 jours</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <div class="kicker">Dunkerque - Marées + Windguru</div>
+        <h1>Fenêtre plongée sur 7 jours</h1>
+        <div class="hero-grid">
+          <div class="hero-main">
+            <p class="hero-formula">Calcul des créneaux : début = heure de marée 1 + 3 h, fin = heure de marée suivante − 3 h ; en cas d’inversion horaire, on retient l’intervalle absolu entre ces deux bornes.</p>
+            <p class="hero-method">Le score météo est calculé uniquement sur les heures des créneaux.</p>
+            <div class="sources">
+              <span>Sources:</span>
+              <a href="https://maree.info/3" target="_blank" rel="noopener noreferrer">Marée.info Dunkerque</a>
+              <a href="https://www.windguru.cz/85184" target="_blank" rel="noopener noreferrer">Windguru Spot 85184</a>
+            </div>
+          </div>
+          <aside class="hero-warning">
+            <h3>Mise en garde</h3>
+            <p>Ne suis pas ce score aveuglément: valide toujours courant, visibilité, état de mer et sécurité surface sur site.</p>
+          </aside>
+        </div>
+        <div class="hero-bottom">
+          <div class="refresh-bar" id="refreshMeta" data-last-refresh-ms="{{ now_epoch_ms }}">
+            <p class="muted">Dernier rafraîchissement : {{ now.strftime("%d/%m/%Y %H:%M:%S") }}</p>
+            <button type="button" class="refresh-btn" id="forceRefreshBtn">Forcer le rafraîchissement</button>
+          </div>
+          <p class="credit">Conçu par André PiedPalmé · <a href="https://www.piedpalme.com" target="_blank" rel="noopener noreferrer">www.piedpalme.com</a></p>
+        </div>
+      </header>
+
+      {% if error %}
+      <section class="error"><strong>Erreur :</strong> {{ error }}</section>
+      {% endif %}
+
+      {% if conditions %}
+      <section class="carousel-panel">
+        <div class="panel-head">
+          <h2>7 prochains jours</h2>
+          <div class="controls">
+            <button class="ctrl-btn" id="prevBtn" type="button" aria-label="Précédent">←</button>
+            <button class="ctrl-btn" id="nextBtn" type="button" aria-label="Suivant">→</button>
+          </div>
+        </div>
+
+        <div class="carousel-track" id="scoreCarousel">
+          {% for c in conditions %}
+          <article class="score-card score-{{ c.css_class }}">
+            <div class="score-top">
+              <div class="day">{{ c.day_label_fr }}</div>
+              <div class="score-badge">{{ c.score }}/100</div>
+            </div>
+
+            <div class="quality">{{ c.label }}</div>
+            <div class="reliability">Fiabilité météo estimée: {{ c.reliability_pct }}%</div>
+            <div class="explain" title="{{ c.score_explanation }}">{{ c.score_explanation }}</div>
+
+            <div class="metrics">
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.coef_quality }}">
+                <span class="metric-label">Coefficient</span>
+                <strong class="metric-value">{{ c.tide_coefficient if c.tide_coefficient is not none else "N/A" }}</strong>
+                <em class="metric-sub">{{ c.coef_quality }}%</em>
+              </div>
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.wind_quality }}">
+                <span class="metric-label">Vent max</span>
+                <strong class="metric-value">{{ c.wind_speed_kn if c.wind_speed_kn is not none else "N/A" }} nds</strong>
+                <em class="metric-sub">{{ c.wind_quality }}%</em>
+              </div>
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.dir_quality }}">
+                <span class="metric-label">Direction</span>
+                {% if c.wind_direction_deg is not none %}
+                <strong class="metric-value wind-dir"><span class="wind-arrow" style="transform: rotate({{ (c.wind_direction_deg + 180) % 360 }}deg)">↑</span>{{ c.wind_direction_deg }}°</strong>
+                {% else %}
+                <strong class="metric-value">N/A</strong>
+                {% endif %}
+                <em class="metric-sub">{{ c.dir_quality }}%</em>
+              </div>
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.wave_quality }}">
+                <span class="metric-label">Vagues</span>
+                <strong class="metric-value">{{ c.wave_height_m if c.wave_height_m is not none else "N/A" }} m</strong>
+                <em class="metric-sub">{{ c.wave_quality }}%</em>
+              </div>
+            </div>
+
+            <div class="slots slot-timeline">
+              <span>Créneaux plongée (heure + durée + score)</span>
+              {% if c.dive_slot_items %}
+              <ul class="slot-list">
+                {% for it in c.dive_slot_items %}
+                <li>
+                  <b>C{{ it.slot_index }}</b>
+                  <strong>{{ it.range }}</strong>
+                  <small>{{ it.duration_min }} min</small>
+                  <em>{{ it.score if it.score is not none else "N/A" }}/100</em>
+                </li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <strong>N/A</strong>
+              {% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      <footer class="footer-snsm">
+        <div class="snsm-banner">
+          <img src="{{ url_for('static', filename='snsm-logo.png') }}" alt="Logo SNSM" />
+          <div class="snsm-text">
+            <p><strong>Sauveteurs en mer, je suis solidaire</strong></p>
+            <p>aidez la SNSM sur <a href="https://www.snsm.org" target="_blank" rel="noopener noreferrer">www.snsm.org</a></p>
+          </div>
+        </div>
+      </footer>
+    </main>
+
+    <script src="{{ url_for('static', filename='carousel.js') }}"></script>
+  </body>
+</html>
