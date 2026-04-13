@@ -54,7 +54,7 @@
 
         <div class="carousel-track" id="scoreCarousel">
           {% for c in conditions %}
-          <article class="score-card score-{{ c.css_class }}">
+          <article class="score-card score-{{ c.css_class }}" data-date="{{ c.day.isoformat() }}">
           <div class="score-card-inner">
             <div class="score-top">
               <div class="day">{{ c.day_label_fr }}</div>
@@ -66,17 +66,17 @@
             <div class="explain" title="{{ c.score_explanation }}">{{ c.score_explanation }}</div>
 
             <div class="metrics">
-              <div class="metric quality-tint" data-penalty="{{ 100 - c.coef_quality }}">
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.coef_quality }}" data-windy="currents">
                 <span class="metric-label">Coefficient</span>
                 <strong class="metric-value">{{ c.tide_coefficient if c.tide_coefficient is not none else "N/A" }}</strong>
                 <em class="metric-sub">{{ c.coef_quality }}%</em>
               </div>
-              <div class="metric quality-tint" data-penalty="{{ 100 - c.wind_quality }}">
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.wind_quality }}" data-windy="wind">
                 <span class="metric-label">Vent max</span>
                 <strong class="metric-value">{{ c.wind_speed_kn if c.wind_speed_kn is not none else "N/A" }} nds</strong>
                 <em class="metric-sub">{{ c.wind_quality }}%</em>
               </div>
-              <div class="metric quality-tint" data-penalty="{{ 100 - c.dir_quality }}">
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.dir_quality }}" data-windy="wind">
                 <span class="metric-label">Direction</span>
                 {% if c.wind_direction_deg is not none %}
                 <strong class="metric-value wind-dir"><span class="wind-arrow" style="transform: rotate({{ (c.wind_direction_deg + 180) % 360 }}deg)">↑</span>{{ c.wind_direction_deg }}°</strong>
@@ -85,7 +85,7 @@
                 {% endif %}
                 <em class="metric-sub">{{ c.dir_quality }}%</em>
               </div>
-              <div class="metric quality-tint" data-penalty="{{ 100 - c.wave_quality }}">
+              <div class="metric quality-tint" data-penalty="{{ 100 - c.wave_quality }}" data-windy="waves">
                 <span class="metric-label">Vagues</span>
                 <strong class="metric-value">{{ c.wave_height_m if c.wave_height_m is not none else "N/A" }} m</strong>
                 <em class="metric-sub">{{ c.wave_quality }}%</em>
@@ -128,5 +128,6 @@
     </main>
 
     <script src="{{ url_for('static', filename='carousel.js') }}"></script>
+    <script src="{{ url_for('static', filename='windy_popup.js') }}"></script>
   </body>
 </html>

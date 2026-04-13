@@ -579,6 +579,122 @@ body::before {
 .snsm-text a { color: var(--cyan); text-decoration: none; }
 .snsm-text a:hover { color: var(--text-hi); }
 
+/* ── WINDY POPUP ──────────────────────────────────────────────── */
+
+/* Clickable indicator on metrics with Windy */
+.metric[data-windy] {
+  cursor: pointer;
+}
+
+.metric[data-windy]::after {
+  content: "⊞";
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 0.6rem;
+  color: var(--cyan);
+  opacity: 0.6;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.metric[data-windy]:hover::after {
+  opacity: 1;
+}
+
+.metric[data-windy]:hover {
+  border-color: var(--cyan);
+}
+
+#wp-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+
+#wp-overlay.active {
+  display: flex;
+}
+
+#wp-modal {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hi);
+  border-top: 3px solid var(--cyan);
+  width: min(780px, 94vw);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+}
+
+#wp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
+}
+
+#wp-title {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+
+#wp-close {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.9rem;
+  background: transparent;
+  border: 1px solid var(--border-hi);
+  color: var(--text);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+#wp-close:hover {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+#wp-body {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+}
+
+#wp-frame {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: none;
+}
+
+#wp-footer {
+  padding: 5px 12px;
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  border-top: 1px solid var(--border);
+  text-align: right;
+}
+
+#wp-footer a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
 /* ── RESPONSIVE ───────────────────────────────────────────────── */
 
 @media (max-width: 760px) {
