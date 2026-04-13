@@ -408,6 +408,7 @@ body::before {
   margin-top: 10px;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: 72px 72px;
   gap: 5px;
 }
 
@@ -418,7 +419,6 @@ body::before {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 72px;
 }
 
 .metric-label {
