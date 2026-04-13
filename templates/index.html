@@ -55,6 +55,7 @@
         <div class="carousel-track" id="scoreCarousel">
           {% for c in conditions %}
           <article class="score-card score-{{ c.css_class }}">
+          <div class="score-card-inner">
             <div class="score-top">
               <div class="day">{{ c.day_label_fr }}</div>
               <div class="score-badge">{{ c.score }}/100</div>
@@ -108,6 +109,7 @@
               <strong>N/A</strong>
               {% endif %}
             </div>
+          </div>
           </article>
           {% endfor %}
         </div>
