@@ -4,25 +4,25 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  --bg:         #080e14;
-  --bg-panel:   #0c1520;
-  --bg-surface: #101c28;
-  --bg-card:    #111e2c;
-  --border:     #1e3248;
-  --border-hi:  #2a4460;
-  --text:       #7090a8;
-  --text-hi:    #a8c4d8;
-  --text-dim:   #3a5060;
-  --amber:      #c08840;
-  --amber-dim:  rgba(192,136,64,0.1);
-  --green:      #3a9060;
-  --green-dim:  rgba(58,144,96,0.1);
-  --red:        #a04030;
-  --red-dim:    rgba(160,64,48,0.12);
-  --cyan:       #3a8090;
-  --ok:         #3a9060;
-  --mid:        #c08840;
-  --bad:        #a04030;
+  --bg:         #f2f4f6;
+  --bg-panel:   #ffffff;
+  --bg-surface: #f8f9fb;
+  --bg-card:    #ffffff;
+  --border:     #c8d4de;
+  --border-hi:  #8aacca;
+  --text:       #3a5060;
+  --text-hi:    #0d1e2c;
+  --text-dim:   #7a9aaa;
+  --amber:      #e09000;
+  --amber-dim:  rgba(224,144,0,0.1);
+  --green:      #008844;
+  --green-dim:  rgba(0,136,68,0.08);
+  --red:        #cc2200;
+  --red-dim:    rgba(204,34,0,0.07);
+  --cyan:       #006888;
+  --ok:         #008844;
+  --mid:        #e09000;
+  --bad:        #cc2200;
 }
 
 * { box-sizing: border-box; }
@@ -35,18 +35,15 @@ body {
   min-height: 100vh;
 }
 
-/* Very subtle scanline texture */
+/* Subtle graph-paper grid */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(0,0,0,0.04) 3px,
-    rgba(0,0,0,0.04) 4px
-  );
+  background-image:
+    linear-gradient(rgba(100,140,180,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,140,180,0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
   pointer-events: none;
   z-index: 0;
 }
@@ -64,10 +61,10 @@ body::before {
 .hero {
   background: var(--bg-panel);
   border: 1px solid var(--border-hi);
-  border-top: 3px solid var(--amber);
+  border-top: 3px solid var(--text-hi);
   padding: 20px 24px 16px;
   position: relative;
-  box-shadow: inset 0 0 60px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
 /* Corner marks */
@@ -398,8 +395,8 @@ body::before {
   -webkit-box-orient: vertical;
   overflow: hidden;
   padding: 6px 8px;
-  background: rgba(0,0,0,0.25);
-  border-left: 2px solid var(--border);
+  background: var(--bg-surface);
+  border-left: 2px solid var(--border-hi);
 }
 
 /* ── METRICS ──────────────────────────────────────────────────── */
@@ -451,39 +448,39 @@ body::before {
 }
 
 /* Quality tint — dark cockpit style */
-.quality-tint.penalty-0 { background: #0d1c14; border-color: #1a3828; }
-.quality-tint.penalty-0 .metric-value { color: #5aaa78; }
-.quality-tint.penalty-0 .metric-label { color: #2e6040; border-color: #1a3828; }
+.quality-tint.penalty-0 { background: #e8f8ee; border-color: #90d0a8; }
+.quality-tint.penalty-0 .metric-value { color: #006830; }
+.quality-tint.penalty-0 .metric-label { background: #d0f0de; border-color: #90d0a8; color: #005028; }
 
-.quality-tint.penalty-1 { background: #0c1a12; border-color: #183020; }
-.quality-tint.penalty-1 .metric-value { color: #4a9868; }
-.quality-tint.penalty-1 .metric-label { color: #285838; }
+.quality-tint.penalty-1 { background: #eef8f2; border-color: #a8d8bc; }
+.quality-tint.penalty-1 .metric-value { color: #007838; }
+.quality-tint.penalty-1 .metric-label { background: #d8f0e4; border-color: #a8d8bc; color: #005830; }
 
-.quality-tint.penalty-2 { background: #181408; border-color: #302808; }
-.quality-tint.penalty-2 .metric-value { color: #a88040; }
-.quality-tint.penalty-2 .metric-label { color: #604818; border-color: #302808; }
+.quality-tint.penalty-2 { background: #fdf8e8; border-color: #e0cc80; }
+.quality-tint.penalty-2 .metric-value { color: #806000; }
+.quality-tint.penalty-2 .metric-label { background: #f8f0c8; border-color: #e0cc80; color: #604800; }
 
-.quality-tint.penalty-3 { background: #1a1408; border-color: #382808; }
+.quality-tint.penalty-3 { background: #fef6e0; border-color: #e8c060; }
 .quality-tint.penalty-3 .metric-value { color: var(--amber); }
-.quality-tint.penalty-3 .metric-label { color: #705020; border-color: #382808; }
+.quality-tint.penalty-3 .metric-label { background: #faecc0; border-color: #e8c060; color: #705000; }
 
-.quality-tint.penalty-4 { background: #1a1008; border-color: #401808; }
-.quality-tint.penalty-4 .metric-value { color: #a86030; }
-.quality-tint.penalty-4 .metric-label { color: #703010; border-color: #401808; }
+.quality-tint.penalty-4 { background: #fef0e8; border-color: #e09070; }
+.quality-tint.penalty-4 .metric-value { color: #c05020; }
+.quality-tint.penalty-4 .metric-label { background: #faded0; border-color: #e09070; color: #902810; }
 
-.quality-tint.penalty-5 { background: #180c08; border-color: #481008; }
+.quality-tint.penalty-5 { background: #fdecea; border-color: #e08080; }
 .quality-tint.penalty-5 .metric-value { color: var(--bad); }
-.quality-tint.penalty-5 .metric-label { color: #802018; border-color: #480c08; }
+.quality-tint.penalty-5 .metric-label { background: #f8d0cc; border-color: #e08080; color: #901818; }
 
-.quality-tint.penalty-6 { background: #140c18; border-color: #301840; }
-.quality-tint.penalty-6 .metric-value { color: #8050a0; }
-.quality-tint.penalty-6 .metric-label { color: #503068; border-color: #301840; }
+.quality-tint.penalty-6 { background: #f8eaff; border-color: #c090e0; }
+.quality-tint.penalty-6 .metric-value { color: #7020a0; }
+.quality-tint.penalty-6 .metric-label { background: #eed8f8; border-color: #c090e0; color: #601888; }
 
 /* ── SLOTS ────────────────────────────────────────────────────── */
 
 .slots {
   margin-top: 10px;
-  background: rgba(0,0,0,0.3);
+  background: #f8f9fb;
   border: 1px solid var(--border);
   padding: 8px;
 }
