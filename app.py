@@ -447,6 +447,7 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
         day_wave_points = [(h_dt, wv) for h_dt, wv in wave_hourly.items() if h_dt.date() == day]
 
         slot_scores: list[int] = []
+        slot_meteo: list[dict] = []
         meteo_hours = 0
         slot_wind_maxes: list[float] = []
         slot_dirs: list[float] = []
@@ -488,6 +489,12 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
             raw_score = score_day(coef, slot_wind, slot_wave, slot_dir)
             slot_score = min(100, raw_score + RISING_TIDE_BONUS) if is_rising else raw_score
             slot_scores.append(slot_score)
+            slot_meteo.append({
+                "wind": round(slot_wind, 1) if slot_wind is not None else None,
+                "dir": round(slot_dir) if slot_dir is not None else None,
+                "wave": round(slot_wave, 2) if slot_wave is not None else None,
+                "is_rising": is_rising,
+            })
 
             if slot_wind is not None:
                 slot_wind_maxes.append(slot_wind)
@@ -507,6 +514,7 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
         dive_slot_items: list[dict[str, Any]] = []
         for idx, (start, end, is_rising) in enumerate(slot_ranges):
             duration_min = int(round((end - start).total_seconds() / 60))
+            m = slot_meteo[idx] if idx < len(slot_meteo) else {}
             dive_slot_items.append(
                 {
                     "slot_index": idx + 1,
@@ -514,6 +522,9 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
                     "duration_min": duration_min,
                     "score": slot_scores[idx] if idx < len(slot_scores) else None,
                     "is_rising": is_rising,
+                    "wind_kn": m.get("wind"),
+                    "wind_dir_deg": m.get("dir"),
+                    "wave_m": m.get("wave"),
                 }
             )
 

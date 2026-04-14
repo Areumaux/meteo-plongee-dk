@@ -522,7 +522,7 @@ body::before {
 
 .slot-list li {
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto;
+  grid-template-columns: auto 1fr auto auto auto auto;
   gap: 6px;
   align-items: center;
   border: 1px solid var(--border);
@@ -542,6 +542,7 @@ body::before {
 .tide-dir { font-size: 0.85rem; font-weight: bold; }
 .tide-up   { color: #4fc; }
 .tide-down { color: #f84; }
+.slot-meteo { color: var(--text-dim); font-size: 0.72rem; white-space: nowrap; }
 
 /* ── WIND DIR ─────────────────────────────────────────────────── */
 

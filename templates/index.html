@@ -109,6 +109,11 @@
                   <small>{{ it.duration_min }} min</small>
                   <em>{{ it.score if it.score is not none else "N/A" }}/100</em>
                   <span class="tide-dir {% if it.is_rising %}tide-up{% else %}tide-down{% endif %}" title="{% if it.is_rising %}Marée montante{% else %}Marée descendante{% endif %}">{% if it.is_rising %}↑{% else %}↓{% endif %}</span>
+                  <span class="slot-meteo">
+                    {% if it.wind_kn is not none %}{{ it.wind_kn }}nds{% else %}—{% endif %}
+                    {% if it.wind_dir_deg is not none %}<span class="wind-arrow" style="display:inline-block;transform:rotate({{ (it.wind_dir_deg + 180) % 360 }}deg)">↑</span>{% endif %}
+                    {% if it.wave_m is not none %} · {{ it.wave_m }}m{% endif %}
+                  </span>
                 </li>
                 {% endfor %}
               </ul>
