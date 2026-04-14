@@ -112,6 +112,16 @@
     if (e.key === "Escape") close();
   });
 
+  // ── Restrict Windy icon to today's card only ───────────────────
+  const todayIso = new Date().toLocaleDateString("fr-CA"); // YYYY-MM-DD local
+
+  document.querySelectorAll(".metric[data-windy]").forEach((el) => {
+    const card = el.closest(".score-card");
+    if (!card || card.dataset.date !== todayIso) {
+      el.removeAttribute("data-windy"); // remove clickability on non-today cards
+    }
+  });
+
   // ── Attach to metric boxes ─────────────────────────────────────
   document.addEventListener("click", (e) => {
     const metric = e.target.closest(".metric[data-windy]");
