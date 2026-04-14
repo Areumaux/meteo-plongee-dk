@@ -563,11 +563,12 @@ body::before {
   padding: 12px 20px;
 }
 
-.snsm-banner img {
+.snsm-logo {
   width: 56px;
   height: 56px;
-  object-fit: contain;
-  opacity: 0.9;
+  flex-shrink: 0;
+  background: url('/static/snsm-logo.png') center / contain no-repeat;
+  opacity: 0.85;
   filter: brightness(0.9) saturate(0.7);
 }
 
