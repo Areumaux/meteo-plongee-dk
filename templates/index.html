@@ -121,8 +121,6 @@
             <div class="slots slot-timeline">
               <span>Créneaux plongée (heure + durée + score)</span>
 
-              {# Modèle simple ±3h #}
-              <p class="slot-model-info slot-model-simple">Modèle ±3h — Le courant s'annule environ 3h avant chaque basse mer et chaque haute mer. Le créneau commence 3h après l'extremum précédent et se termine 3h avant le suivant. Plus le demi-cycle est court, plus la fenêtre est réduite.</p>
               <ul class="slot-list slot-model slot-model-simple">
                 {% if c.dive_slot_items %}
                   {% for it in c.dive_slot_items %}
@@ -146,7 +144,6 @@
               </ul>
 
               {# Modèle scientifique #}
-              <p class="slot-model-info slot-model-sci" style="display:none">Modèle scientifique — Le renversement de courant est calculé en heures de marée (1 heure de marée = 1/6 du demi-cycle réel) : 2h30 de marée avant la pleine mer, 3h avant la basse mer. La durée de la fenêtre dépend de l'amplitude de chaque marée : plus le marnage est fort, plus le courant est puissant et la fenêtre courte.</p>
               <ul class="slot-list slot-model slot-model-sci" style="display:none">
                 {% if c.dive_slot_items_sci %}
                   {% for it in c.dive_slot_items_sci %}
@@ -175,6 +172,83 @@
         </div>
       </section>
       {% endif %}
+
+      <section class="model-explainer" id="modelExplainer">
+
+        <div class="me-block slot-model-simple">
+          <h3 class="me-title">Modèle ±3h — règle empirique du renversement</h3>
+          <div class="me-body">
+            <p>Ce modèle applique la <strong>règle des 3 heures</strong> (Dr Carter / RYA), largement utilisée par les plongeurs et les navigateurs côtiers. Elle postule que le courant de marée s'annule (renversement) environ <strong>3 heures avant chaque extrémum</strong> de marée (haute mer et basse mer).</p>
+
+            <h4>Calcul des fenêtres</h4>
+            <p>Pour deux extrémums consécutifs E₁ (à t₁) et E₂ (à t₂) :</p>
+            <pre class="me-formula">début   = t₁ + 3 h
+fin     = t₂ − 3 h
+durée   = fin − début  (ignoré si &lt; 10 min)</pre>
+            <p>Le créneau est centré sur la mi-marée entre E₁ et E₂. La direction de marée (montante ▲ ou descendante ▼) est déterminée par la nature de E₂ : si E₂ est une haute mer (PM), la marée est <em>montante</em> ; si E₂ est une basse mer (BM), la marée est <em>descendante</em>.</p>
+
+            <h4>Limites à Dunkerque</h4>
+            <p>Le flot (BM→PM) dure environ <strong>5h40</strong> et le jusant (PM→BM) environ <strong>6h40</strong>. Pour les demi-cycles courts, la fenêtre peut être très réduite (parfois &lt; 30 min). C'est une bonne approximation, mais elle ignore la variation d'amplitude entre vives-eaux et mortes-eaux.</p>
+
+            <h4>Score du créneau</h4>
+            <pre class="me-formula">score = f(coefficient) × f(vent) × f(vagues) × f(direction)
+        + 5 pts si marée montante (meilleure visibilité)</pre>
+
+            <h4>Sources</h4>
+            <ul class="me-sources">
+              <li>Heures et hauteurs de marée : <a href="https://maree.info/3" target="_blank" rel="noopener noreferrer">Marée.info — Port de Dunkerque (port 3)</a></li>
+              <li>Carter, R. (2012). <em>Coastal and Estuarine Tidal Current Prediction</em> — règle des 3h.</li>
+              <li>Données météo : <a href="https://www.windguru.cz/85184" target="_blank" rel="noopener noreferrer">Windguru spot 85184</a> (vent + vagues, scraping HTML)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="me-block slot-model-sci" style="display:none">
+          <h3 class="me-title">Modèle scientifique — heures de marée + sinusoïde NOAA</h3>
+          <div class="me-body">
+            <p>Ce modèle utilise deux approches complémentaires : le concept d'<strong>heures de marée</strong> pour localiser le renversement, et un <strong>modèle sinusoïdal</strong> calibré sur les données NOAA pour calculer la durée de la fenêtre de faible courant.</p>
+
+            <h4>1 — Localisation du renversement (heures de marée)</h4>
+            <p>Une <em>heure de marée</em> vaut 1/6 du demi-cycle réel. Le courant se renverse :</p>
+            <pre class="me-formula">vers la haute mer (PM) :  t_slack = t_PM − 2 h 30 de marée
+vers la basse mer (BM)  :  t_slack = t_BM − 3 h 00 de marée
+
+soit en temps réel :
+  hm = demi_cycle_réel / 6
+  t_slack(PM) = t_PM − 2.5 × hm
+  t_slack(BM) = t_BM − 3.0 × hm</pre>
+            <p>Ces coefficients (2,5 PM / 3,0 BM) correspondent à l'asymétrie observée dans les ports de la Mer du Nord (renversement légèrement plus tardif avant la BM en raison de la friction sur les hauts fonds).</p>
+
+            <h4>2 — Durée de la fenêtre (sinusoïde NOAA)</h4>
+            <p>La vitesse du courant suit approximativement une sinusoïde. On calcule le temps pendant lequel le courant reste sous le seuil de plongée (V_seuil = 0,30 m/s) :</p>
+            <pre class="me-formula">V(t) = V_max × sin(ω × t)   avec ω = 2π / T_semi-diurnal
+T_semi-diurnal = 745 min (demi-journée lunaire)
+
+V_max = f(marnage) — interpolé entre :
+  morte-eau (marnage 2,5 m) → V_max = 0,55 m/s → fenêtre ≈ 137 min
+  vive-eau  (marnage 5,9 m) → V_max = 1,00 m/s → fenêtre ≈  72 min
+
+durée_fenêtre = (2 / ω) × arcsin(V_seuil / V_max)</pre>
+            <p>La fenêtre est centrée sur <code>t_slack</code>. Plus le marnage est élevé (vives-eaux), plus le courant maximal est fort et plus la fenêtre est courte.</p>
+
+            <h4>Score du créneau</h4>
+            <pre class="me-formula">score = f(coefficient) × f(vent) × f(vagues) × f(direction)
+        + 5 pts si marée montante (meilleure visibilité)</pre>
+            <p>Les paramètres météo (vent, vagues, direction) sont interpolés sur les données horaires Windguru pour la plage temporelle du créneau.</p>
+
+            <h4>Sources et références</h4>
+            <ul class="me-sources">
+              <li>Heures et hauteurs de marée : <a href="https://maree.info/3" target="_blank" rel="noopener noreferrer">Marée.info — Port de Dunkerque (port 3)</a></li>
+              <li>Modèle sinusoïdal : <a href="https://tidesandcurrents.noaa.gov/publications/Tidal_Analysis_and_Predictions.pdf" target="_blank" rel="noopener noreferrer">NOAA — Tidal Analysis and Predictions (2000)</a></li>
+              <li>Heures de marée (tidal hours) : Admiralty Manual of Tides, ch. 3 — Tidal Streams.</li>
+              <li>Asymétrie flot/jusant Mer du Nord : Prandle, D. (1982). <em>The vertical structure of tidal currents</em>. Geophysical &amp; Astrophysical Fluid Dynamics.</li>
+              <li>Données météo : <a href="https://www.windguru.cz/85184" target="_blank" rel="noopener noreferrer">Windguru spot 85184</a> (vent + vagues)</li>
+              <li>Vitesses de référence Dunkerque : <a href="https://www.shom.fr" target="_blank" rel="noopener noreferrer">SHOM — Atlas des courants de marée Manche orientale</a></li>
+            </ul>
+          </div>
+        </div>
+
+      </section>
 
       <footer class="footer-snsm">
         <div class="snsm-banner">

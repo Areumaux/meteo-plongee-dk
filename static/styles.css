@@ -831,16 +831,117 @@ html[data-theme="light"] #slotPopup {
   padding: 4px 8px;
 }
 
-.slot-model-info {
-  font-family: "Share Tech Mono", monospace;
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  letter-spacing: 0.04em;
-  margin: 4px 0 5px;
-  line-height: 1.5;
-  border-left: 2px solid var(--border-hi);
-  padding-left: 6px;
+/* ── Model explainer section ─────────────────────────────── */
+.model-explainer {
+  max-width: 860px;
+  margin: 24px auto 0;
+  padding: 0 12px;
 }
+
+.me-block {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--border-hi);
+  border-radius: 6px;
+  padding: 20px 24px 24px;
+}
+
+.me-title {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.me-body {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+.me-body h4 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin: 16px 0 6px;
+}
+
+.me-body p {
+  margin: 0 0 8px;
+}
+
+.me-body strong { color: var(--text-hi); }
+.me-body em { color: var(--amber); font-style: normal; }
+.me-body code {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.8em;
+  color: var(--cyan);
+  background: rgba(0,204,221,0.08);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.me-formula {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  color: var(--text-hi);
+  background: var(--bg-surface);
+  border-left: 3px solid var(--border-hi);
+  border-radius: 0 4px 4px 0;
+  padding: 8px 12px;
+  margin: 8px 0 12px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.me-sources {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.me-sources li {
+  padding: 3px 0 3px 14px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.me-sources li::before {
+  content: "›";
+  position: absolute;
+  left: 2px;
+  color: var(--border-hi);
+}
+
+.me-sources a {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+.me-sources a:hover { text-decoration: underline; }
+
+/* light theme overrides */
+html[data-theme="light"] .me-block {
+  background: #f0f4f8;
+  border-color: #b0c8d8;
+  border-top-color: #4a8aaa;
+}
+html[data-theme="light"] .me-formula {
+  background: #e4ecf2;
+  border-left-color: #4a8aaa;
+  color: #1a3a52;
+}
+html[data-theme="light"] .me-sources { color: #5a7a8a; }
+html[data-theme="light"] .me-sources li { border-bottom-color: #c0d4e0; }
 
 .theme-fab {
   position: fixed;
