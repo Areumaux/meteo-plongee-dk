@@ -126,7 +126,7 @@
                   <strong>{{ it.range }}</strong>
                   <small>{{ it.duration_min }} min</small>
                   <em>{{ it.score if it.score is not none else "N/A" }}/100</em>
-                  <span class="tide-dir {% if it.is_rising %}tide-up{% else %}tide-down{% endif %}">{% if it.is_rising %}↑{% else %}↓{% endif %}</span>
+                  <span class="tide-dir {% if it.is_rising %}tide-up{% else %}tide-down{% endif %}">{% if it.is_rising %}▲{% else %}▼{% endif %}</span>
                 </li>
                 {% endfor %}
               </ul>

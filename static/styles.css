@@ -531,13 +531,15 @@ body::before {
   cursor: pointer;
   gap: 6px;
   align-items: center;
-  border: 1px solid var(--border);
+  border: none;
+  border-top: 1px solid var(--border);
   background: var(--bg-surface);
   padding: 5px 8px;
   font-family: "Share Tech Mono", monospace;
   font-size: 0.8rem;
-  transition: border-color 0.15s;
 }
+
+.slot-list li:first-child { border-top: none; }
 
 
 .slot-list li:hover { border-color: var(--cyan); }
@@ -547,9 +549,9 @@ body::before {
 .slot-list strong { color: var(--text-hi); }
 .slot-list small { color: var(--text-dim); font-size: 0.72rem; }
 .slot-list em { font-style: normal; color: var(--amber); font-size: 0.8rem; }
-.tide-dir  { font-size: 1.3rem; line-height: 1; color: #fff; text-align: center; text-decoration: none; border: none; outline: none; }
-.tide-up   { color: #fff; }
-.tide-down { color: #fff; }
+.tide-dir  { font-size: 0.9rem; color: #c8e8f8; vertical-align: middle; line-height: 1; }
+.tide-up   { color: #c8e8f8; }
+.tide-down { color: #c8e8f8; }
 
 /* ── TIDE EVENTS (PM/BM times on card) ───────────────────────── */
 
