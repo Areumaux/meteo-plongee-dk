@@ -676,6 +676,27 @@ html[data-theme="light"] .dive-map {
 
 @media (max-width: 760px) {
   .map-wrap { aspect-ratio: 4 / 3; }
+
+  .map-disclaimer {
+    position: fixed;
+    inset: 0;
+    z-index: 8500;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+  .map-disclaimer-box {
+    padding: 18px 16px;
+    margin: auto;
+    width: 100%;
+  }
+
+  .md-icon  { font-size: 1.4rem; }
+  .md-title { font-size: 0.85rem; }
+  .md-text  { font-size: 0.8rem; }
+  .md-check { font-size: 0.75rem; }
+  .md-btn   { font-size: 0.75rem; padding: 10px 14px; }
 }
 
 /* ── SLOT METEO POPUP ─────────────────────────────────────────── */
