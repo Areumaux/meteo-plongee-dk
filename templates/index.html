@@ -18,6 +18,14 @@
     <script>if(localStorage.getItem('dive-theme')==='light')document.documentElement.setAttribute('data-theme','light');</script>
   </head>
   <body>
+    <div class="model-fab" id="modelFab" title="Changer de modèle de calcul">
+      <span class="model-fab-label" id="modelFabLabel">±3h</span>
+      <label class="theme-switch">
+        <input type="checkbox" id="modelToggle">
+        <span class="theme-slider"></span>
+      </label>
+      <span class="model-fab-label">SCI</span>
+    </div>
     <div class="theme-fab" id="themeFab" title="Mode clair / sombre">
       <span class="theme-fab-icon" id="themeFabIcon"></span>
       <label class="theme-switch">
@@ -112,27 +120,50 @@
 
             <div class="slots slot-timeline">
               <span>Créneaux plongée (heure + durée + score)</span>
-              {% if c.dive_slot_items %}
-              <ul class="slot-list">
-                {% for it in c.dive_slot_items %}
-                <li class="slot-row"
-                    data-wind="{{ it.wind_kn if it.wind_kn is not none else '' }}"
-                    data-dir="{{ it.wind_dir_deg if it.wind_dir_deg is not none else '' }}"
-                    data-wave="{{ it.wave_m if it.wave_m is not none else '' }}"
-                    data-rising="{{ 'true' if it.is_rising else 'false' }}"
-                    data-range="{{ it.range }}"
-                    title="Cliquer pour détails météo">
-                  <b>C{{ it.slot_index }}</b>
-                  <strong>{{ it.range }}</strong>
-                  <small>{{ it.duration_min }} min</small>
-                  <em>{{ it.score if it.score is not none else "N/A" }}/100</em>
-                  <span class="tide-dir {% if it.is_rising %}tide-up{% else %}tide-down{% endif %}">{% if it.is_rising %}▲{% else %}▼{% endif %}</span>
-                </li>
-                {% endfor %}
+
+              {# Modèle simple ±3h #}
+              <ul class="slot-list slot-model slot-model-simple">
+                {% if c.dive_slot_items %}
+                  {% for it in c.dive_slot_items %}
+                  <li class="slot-row"
+                      data-wind="{{ it.wind_kn if it.wind_kn is not none else '' }}"
+                      data-dir="{{ it.wind_dir_deg if it.wind_dir_deg is not none else '' }}"
+                      data-wave="{{ it.wave_m if it.wave_m is not none else '' }}"
+                      data-rising="{{ 'true' if it.is_rising else 'false' }}"
+                      data-range="{{ it.range }}"
+                      title="Cliquer pour détails météo">
+                    <b>C{{ it.slot_index }}</b>
+                    <strong>{{ it.range }}</strong>
+                    <small>{{ it.duration_min }} min</small>
+                    <em>{{ it.score if it.score is not none else "N/A" }}/100</em>
+                    <span class="tide-dir {% if it.is_rising %}tide-up{% else %}tide-down{% endif %}">{% if it.is_rising %}▲{% else %}▼{% endif %}</span>
+                  </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="slot-empty">Aucun créneau</li>
+                {% endif %}
               </ul>
-              {% else %}
-              <strong>N/A</strong>
-              {% endif %}
+
+              {# Modèle scientifique #}
+              <ul class="slot-list slot-model slot-model-sci" style="display:none">
+                {% if c.dive_slot_items_sci %}
+                  {% for it in c.dive_slot_items_sci %}
+                  <li class="slot-row"
+                      data-wind="" data-dir="" data-wave=""
+                      data-rising="{{ 'true' if it.is_rising else 'false' }}"
+                      data-range="{{ it.range }}"
+                      title="Cliquer pour détails météo">
+                    <b>C{{ it.slot_index }}</b>
+                    <strong>{{ it.range }}</strong>
+                    <small>{{ it.duration_min }} min</small>
+                    <em>{{ it.score if it.score is not none else "N/A" }}/100</em>
+                    <span class="tide-dir {% if it.is_rising %}tide-up{% else %}tide-down{% endif %}">{% if it.is_rising %}▲{% else %}▼{% endif %}</span>
+                  </li>
+                  {% endfor %}
+                {% else %}
+                  <li class="slot-empty">Aucun créneau</li>
+                {% endif %}
+              </ul>
             </div>
 
             <div class="explain">{{ c.score_explanation }}</div>
@@ -158,5 +189,26 @@
     <script src="{{ url_for('static', filename='carousel.js') }}"></script>
     <script src="{{ url_for('static', filename='windy_popup.js') }}"></script>
     <script src="{{ url_for('static', filename='slot_popup.js') }}"></script>
+    <script>
+      (() => {
+        const KEY    = 'dive-model';
+        const toggle = document.getElementById('modelToggle');
+        if (!toggle) return;
+
+        function apply(sci) {
+          document.querySelectorAll('.slot-model-simple').forEach(el => el.style.display = sci ? 'none' : '');
+          document.querySelectorAll('.slot-model-sci').forEach(el => el.style.display = sci ? '' : 'none');
+          toggle.checked = sci;
+        }
+
+        apply(localStorage.getItem(KEY) === 'sci');
+
+        toggle.addEventListener('change', () => {
+          const sci = toggle.checked;
+          localStorage.setItem(KEY, sci ? 'sci' : 'simple');
+          apply(sci);
+        });
+      })();
+    </script>
   </body>
 </html>

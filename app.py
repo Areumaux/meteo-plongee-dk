@@ -69,8 +69,9 @@ class DailyDiveConditions:
     wind_quality: int
     wave_quality: int
     dir_quality: int
-    dive_slot_items: list[dict[str, Any]]
-    tide_events: list[dict[str, Any]]  # [{time_str, height_m, is_pm}, ...]
+    dive_slot_items: list[dict[str, Any]]       # modèle actif (simple par défaut)
+    dive_slot_items_sci: list[dict[str, Any]]   # modèle scientifique
+    tide_events: list[dict[str, Any]]           # [{time_str, height_m, is_pm}, ...]
 
 
 def clamp(value: float, min_value: float, max_value: float) -> float:
@@ -227,9 +228,54 @@ def _slack_window_minutes(tidal_range: float) -> float:
     return (2.0 / _OMEGA) * math.asin(ratio)
 
 
+SlotList  = list[tuple[datetime, datetime, bool]]
+SlotsByDay = dict[date, SlotList]
+
+
+def _build_slots_simple(events: list[tuple[datetime, float]]) -> SlotsByDay:
+    """±3h absolute model (Dr Carter): window = abs(E1+3h ↔ E2-3h)."""
+    OFFSET = timedelta(hours=3)
+    slots: SlotsByDay = {}
+    for i in range(len(events) - 1):
+        e1_dt, e1_h = events[i]
+        e2_dt, e2_h = events[i + 1]
+        if e2_dt <= e1_dt:
+            continue
+        is_rising = e2_h > e1_h
+        b1, b2 = e1_dt + OFFSET, e2_dt - OFFSET
+        start, end = min(b1, b2), max(b1, b2)
+        if (end - start).total_seconds() < 600:
+            continue
+        mid_day = (start + (end - start) / 2).date()
+        slots.setdefault(mid_day, []).append((start, end, is_rising))
+    return slots
+
+
+def _build_slots_scientific(events: list[tuple[datetime, float]]) -> SlotsByDay:
+    """Scientific model: tidal-hour offsets (K=2.5/3.0) + NOAA sinusoid window."""
+    slots: SlotsByDay = {}
+    for i in range(len(events) - 1):
+        e1_dt, e1_h = events[i]
+        e2_dt, e2_h = events[i + 1]
+        if e2_dt <= e1_dt:
+            continue
+        half_cycle_min = (e2_dt - e1_dt).total_seconds() / 60.0
+        hm_min = half_cycle_min / 6.0
+        e2_is_pm = e2_h > e1_h
+        is_rising = e2_is_pm
+        k = K_SLACK_TO_PM if e2_is_pm else K_SLACK_TO_BM
+        t_slack = e2_dt - timedelta(minutes=k * hm_min)
+        tidal_range = abs(e2_h - e1_h)
+        dur_min = _slack_window_minutes(tidal_range)
+        half_dur = timedelta(minutes=dur_min / 2.0)
+        start, end = t_slack - half_dur, t_slack + half_dur
+        slots.setdefault(t_slack.date(), []).append((start, end, is_rising))
+    return slots
+
+
 def fetch_dive_slots_by_day(
     coefficients: dict[date, float],
-) -> tuple[dict[date, list[tuple[datetime, datetime, bool]]], dict[date, list[dict]]]:
+) -> tuple[SlotsByDay, SlotsByDay, dict[date, list[dict]]]:
     """
     Compute dive windows using the Dunkirk tidal-current model:
       - slack centre = E2 - k * HM  (k=2.5 before PM, k=3.0 before BM)
@@ -300,35 +346,10 @@ def fetch_dive_slots_by_day(
             "is_pm": is_pm,
         })
 
-    # ── Build slots: centred ±3h around each tidal extremum ───────────
-    # Renversement = extremum - 3h (avant chaque PM ou BM)
-    # Fenêtre = [extremum_précédent + 3h, extremum_suivant - 3h]
-    # En valeur absolue : start=min des deux bornes, end=max → toujours positif
-    OFFSET = timedelta(hours=3)
-    slots_by_day: dict[date, list[tuple[datetime, datetime, bool]]] = {}
+    slots_simple     = _build_slots_simple(events)
+    slots_scientific = _build_slots_scientific(events)
 
-    for i in range(len(events) - 1):
-        e1_dt, e1_h = events[i]
-        e2_dt, e2_h = events[i + 1]
-        if e2_dt <= e1_dt:
-            continue
-
-        is_rising = e2_h > e1_h   # montante = BM→PM
-
-        # Toujours prendre en absolu pour gérer les demi-cycles asymétriques
-        b1 = e1_dt + OFFSET
-        b2 = e2_dt - OFFSET
-        start = min(b1, b2)
-        end   = max(b1, b2)
-
-        # Minimum viable : 10 min (évite les créneaux anecdotiques)
-        if (end - start).total_seconds() < 600:
-            continue
-
-        mid_day = (start + (end - start) / 2).date()
-        slots_by_day.setdefault(mid_day, []).append((start, end, is_rising))
-
-    return slots_by_day, events_by_day
+    return slots_simple, slots_scientific, events_by_day
 
 
 def fetch_tide_coefficients() -> dict[date, float]:
@@ -447,11 +468,11 @@ def french_weekday_name(d: date) -> str:
 def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
     tides = fetch_tide_coefficients()
     wind_hourly, wave_hourly = fetch_windguru_hourly()
-    dive_slots_by_day, tide_events_by_day = fetch_dive_slots_by_day(tides)
+    dive_slots_simple, dive_slots_sci, tide_events_by_day = fetch_dive_slots_by_day(tides)
 
     # Only keep days where both wind and wave forecasts exist.
     weather_days = sorted({dt.date() for dt in wind_hourly.keys()} & {dt.date() for dt in wave_hourly.keys()})
-    all_days = sorted(set(tides.keys()) & set(weather_days) & set(dive_slots_by_day.keys()))
+    all_days = sorted(set(tides.keys()) & set(weather_days) & (set(dive_slots_simple.keys()) | set(dive_slots_sci.keys())))
     all_days = [d for d in all_days if d >= datetime.now(PARIS_TZ).date()]
     if limit_days is not None:
         all_days = all_days[:limit_days]
@@ -460,7 +481,7 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
     today = datetime.now(PARIS_TZ).date()
     for day in all_days:
         coef = tides.get(day)
-        slot_ranges = dive_slots_by_day.get(day, [])
+        slot_ranges = dive_slots_simple.get(day, [])
         slot_labels = [f"{s.strftime('%H:%M')} - {e.strftime('%H:%M')}" for s, e, _r in slot_ranges]
 
         day_wind_points = [(h_dt, w) for h_dt, w in wind_hourly.items() if h_dt.date() == day]
@@ -531,22 +552,28 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
         reliability_pct = reliability_for_day((day - today).days)
         score_explanation = build_score_explanation(score, coef, wind_speed, wave_height, wind_dir, reliability_pct)
         coef_q, wind_q, wave_q, dir_q = criterion_quality_scores(coef, wind_speed, wave_height, wind_dir)
-        dive_slot_items: list[dict[str, Any]] = []
-        for idx, (start, end, is_rising) in enumerate(slot_ranges):
-            duration_min = int(round((end - start).total_seconds() / 60))
-            m = slot_meteo[idx] if idx < len(slot_meteo) else {}
-            dive_slot_items.append(
-                {
+        def make_slot_items(ranges: SlotList, meteo: list[dict], scores: list[int]) -> list[dict[str, Any]]:
+            items = []
+            for idx, (start, end, is_rising) in enumerate(ranges):
+                duration_min = int(round((end - start).total_seconds() / 60))
+                m = meteo[idx] if idx < len(meteo) else {}
+                items.append({
                     "slot_index": idx + 1,
                     "range": f"{start.strftime('%H:%M')} - {end.strftime('%H:%M')}",
                     "duration_min": duration_min,
-                    "score": slot_scores[idx] if idx < len(slot_scores) else None,
+                    "score": scores[idx] if idx < len(scores) else None,
                     "is_rising": is_rising,
                     "wind_kn": m.get("wind"),
                     "wind_dir_deg": m.get("dir"),
                     "wave_m": m.get("wave"),
-                }
-            )
+                })
+            return items
+
+        dive_slot_items = make_slot_items(slot_ranges, slot_meteo, slot_scores)
+
+        # Scientific model slots (display only, no meteo breakdown)
+        sci_ranges = dive_slots_sci.get(day, [])
+        dive_slot_items_sci = make_slot_items(sci_ranges, [], [])
 
         rows.append(
             DailyDiveConditions(
@@ -569,6 +596,7 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
                 wave_quality=wave_q,
                 dir_quality=dir_q,
                 dive_slot_items=dive_slot_items,
+                dive_slot_items_sci=dive_slot_items_sci,
                 tide_events=tide_events_by_day.get(day, []),
             )
         )
