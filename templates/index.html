@@ -79,6 +79,9 @@
 
             <div class="quality">{{ c.label }}</div>
             <div class="reliability">Fiabilité météo estimée: {{ c.reliability_pct }}%</div>
+            {% if c.tide_events %}
+            <div class="tide-events">{% for ev in c.tide_events %}<span class="te {% if ev.is_pm %}te-pm{% else %}te-bm{% endif %}">{% if ev.is_pm %}▲{% else %}▼{% endif %} {{ ev.time_str }} <em>{{ ev.height_m }}m</em></span>{% endfor %}</div>
+            {% endif %}
 
             <div class="metrics">
               <div class="metric quality-tint" data-penalty="{{ 100 - c.coef_quality }}" data-windy="currents">

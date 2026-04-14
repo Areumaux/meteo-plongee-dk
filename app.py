@@ -70,6 +70,7 @@ class DailyDiveConditions:
     wave_quality: int
     dir_quality: int
     dive_slot_items: list[dict[str, Any]]
+    tide_events: list[dict[str, Any]]  # [{time_str, height_m, is_pm}, ...]
 
 
 def clamp(value: float, min_value: float, max_value: float) -> float:
@@ -228,7 +229,7 @@ def _slack_window_minutes(tidal_range: float) -> float:
 
 def fetch_dive_slots_by_day(
     coefficients: dict[date, float],
-) -> dict[date, list[tuple[datetime, datetime, bool]]]:
+) -> tuple[dict[date, list[tuple[datetime, datetime, bool]]], dict[date, list[dict]]]:
     """
     Compute dive windows using the Dunkirk tidal-current model:
       - slack centre = E2 - k * HM  (k=2.5 before PM, k=3.0 before BM)
@@ -278,6 +279,27 @@ def fetch_dive_slots_by_day(
 
     events.sort(key=lambda x: x[0])
 
+    # ── Index tide events by day ───────────────────────────────────
+    events_by_day: dict[date, list[dict]] = {}
+    for i in range(len(events)):
+        dt, h = events[i]
+        # Determine PM or BM by comparing with neighbours
+        prev_h = events[i - 1][1] if i > 0 else None
+        next_h = events[i + 1][1] if i < len(events) - 1 else None
+        if prev_h is not None and next_h is not None:
+            is_pm = h > prev_h and h > next_h
+        elif next_h is not None:
+            is_pm = h > next_h
+        elif prev_h is not None:
+            is_pm = h > prev_h
+        else:
+            is_pm = False
+        events_by_day.setdefault(dt.date(), []).append({
+            "time_str": dt.strftime("%H:%M"),
+            "height_m": round(h, 2),
+            "is_pm": is_pm,
+        })
+
     # ── Build slots from consecutive half-cycles ────────────────────
     slots_by_day: dict[date, list[tuple[datetime, datetime, bool]]] = {}
 
@@ -308,7 +330,7 @@ def fetch_dive_slots_by_day(
 
         slots_by_day.setdefault(t_slack.date(), []).append((start, end, is_rising))
 
-    return slots_by_day
+    return slots_by_day, events_by_day
 
 
 def fetch_tide_coefficients() -> dict[date, float]:
@@ -427,7 +449,7 @@ def french_weekday_name(d: date) -> str:
 def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
     tides = fetch_tide_coefficients()
     wind_hourly, wave_hourly = fetch_windguru_hourly()
-    dive_slots_by_day = fetch_dive_slots_by_day(tides)
+    dive_slots_by_day, tide_events_by_day = fetch_dive_slots_by_day(tides)
 
     # Only keep days where both wind and wave forecasts exist.
     weather_days = sorted({dt.date() for dt in wind_hourly.keys()} & {dt.date() for dt in wave_hourly.keys()})
@@ -549,6 +571,7 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
                 wave_quality=wave_q,
                 dir_quality=dir_q,
                 dive_slot_items=dive_slot_items,
+                tide_events=tide_events_by_day.get(day, []),
             )
         )
 
