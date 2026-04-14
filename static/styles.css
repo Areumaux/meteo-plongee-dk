@@ -300,6 +300,7 @@ body::before {
 
 .carousel-track {
   display: flex;
+  align-items: stretch;
   gap: 10px;
   overflow-x: auto;
   scroll-behavior: smooth;
@@ -326,7 +327,14 @@ body::before {
 .score-correct { border-left: 3px solid var(--mid); }
 .score-mauvais { border-left: 3px solid var(--bad); }
 
-.score-card-inner { padding: 12px 12px 10px; }
+.score-card-inner {
+  padding: 12px 12px 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.slots { margin-top: auto; padding-top: 10px; }
 
 /* ── CARD HEADER ── */
 
