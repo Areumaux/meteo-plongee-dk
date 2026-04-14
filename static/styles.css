@@ -528,7 +528,8 @@ body::before {
 
 .slot-list li {
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto auto;
+  grid-template-columns: auto 1fr auto auto auto;
+  cursor: pointer;
   gap: 6px;
   align-items: center;
   border: 1px solid var(--border);
@@ -539,7 +540,8 @@ body::before {
   transition: border-color 0.15s;
 }
 
-.slot-list li:hover { border-color: var(--border-hi); }
+.slot-list li:hover { border-color: var(--cyan); }
+.slot-list li.slot-active { border-color: var(--cyan); background: rgba(0,204,221,0.07); }
 
 .slot-list b { color: var(--cyan); font-size: 0.72rem; letter-spacing: 0.06em; }
 .slot-list strong { color: var(--text-hi); }
@@ -548,7 +550,61 @@ body::before {
 .tide-dir { font-size: 0.85rem; font-weight: bold; }
 .tide-up   { color: #4fc; }
 .tide-down { color: #f84; }
-.slot-meteo { color: var(--text-dim); font-size: 0.72rem; white-space: nowrap; }
+
+/* ── SLOT METEO POPUP ─────────────────────────────────────────── */
+
+#slotPopup {
+  display: none;
+  position: fixed;
+  z-index: 8000;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-hi);
+  border-top: 2px solid var(--cyan);
+  padding: 10px 14px 12px;
+  min-width: 180px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  pointer-events: none;
+}
+
+#slotPopup.visible { display: block; }
+
+#slotPopup .sp-title {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  margin-bottom: 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+}
+
+#slotPopup .sp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 3px 0;
+}
+
+#slotPopup .sp-key {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+#slotPopup .sp-val {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.88rem;
+  color: var(--text-hi);
+  font-weight: 600;
+}
+
+html[data-theme="light"] #slotPopup {
+  box-shadow: 0 4px 20px rgba(0,60,100,0.18);
+}
 
 /* ── WIND DIR ─────────────────────────────────────────────────── */
 
