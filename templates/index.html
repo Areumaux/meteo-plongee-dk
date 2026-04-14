@@ -18,6 +18,13 @@
     <script>if(localStorage.getItem('dive-theme')==='light')document.documentElement.setAttribute('data-theme','light');</script>
   </head>
   <body>
+    <div class="theme-fab" id="themeFab" title="Mode clair / sombre">
+      <span class="theme-fab-icon" id="themeFabIcon"></span>
+      <label class="theme-switch">
+        <input type="checkbox" id="themeToggle">
+        <span class="theme-slider"></span>
+      </label>
+    </div>
     <main class="container">
       <header class="hero">
         <div class="kicker">Dunkerque · Créneaux plongée · Marées + Météo</div>
@@ -41,7 +48,6 @@
             <div class="refresh-bar" id="refreshMeta" data-last-refresh-ms="{{ now_epoch_ms }}">
               <p class="muted">Dernier rafraîchissement : {{ now.strftime("%d/%m/%Y %H:%M:%S") }}</p>
               <button type="button" class="refresh-btn" id="forceRefreshBtn">Forcer le rafraîchissement</button>
-              <button type="button" id="themeBtn" aria-label="Basculer thème">🌙</button>
             </div>
             <p class="credit">Conçu par André PiedPalmé · <a href="https://www.piedpalme.com" target="_blank" rel="noopener noreferrer">www.piedpalme.com</a></p>
           </div>

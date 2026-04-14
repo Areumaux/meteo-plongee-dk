@@ -8,24 +8,26 @@
     } else {
       html.removeAttribute("data-theme");
     }
-    const btn = document.getElementById("themeBtn");
-    if (btn) btn.textContent = light ? "☀️" : "🌙";
+    const icon   = document.getElementById("themeFabIcon");
+    const toggle = document.getElementById("themeToggle");
+    if (icon)   icon.textContent = light ? "☀️" : "🌙";
+    if (toggle) toggle.checked   = light;
   }
 
-  // Restore saved preference immediately (avoids flash)
-  const saved = localStorage.getItem(KEY);
-  apply(saved === "light");
+  // Apply before paint to avoid flash
+  apply(localStorage.getItem(KEY) === "light");
 
-  // Wire up button after DOM ready
   document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("themeBtn");
-    if (!btn) return;
-    // sync icon in case apply() ran before DOMContentLoaded
-    btn.textContent = html.hasAttribute("data-theme") ? "☀️" : "🌙";
-    btn.addEventListener("click", () => {
-      const light = !html.hasAttribute("data-theme");
-      localStorage.setItem(KEY, light ? "light" : "dark");
-      apply(light);
-    });
+    // Sync in case apply() ran before DOM was ready
+    apply(html.hasAttribute("data-theme"));
+
+    const toggle = document.getElementById("themeToggle");
+    if (toggle) {
+      toggle.addEventListener("change", () => {
+        const light = toggle.checked;
+        localStorage.setItem(KEY, light ? "light" : "dark");
+        apply(light);
+      });
+    }
   });
 })();
