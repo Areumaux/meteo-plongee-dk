@@ -300,9 +300,10 @@ def fetch_dive_slots_by_day(
             "is_pm": is_pm,
         })
 
-    # ── Build slots: simple ±3h rule (Dr Carter / SHOM Dunkirk) ───────
-    # Start = E1 + 3h,  End = E2 - 3h
-    # If End ≤ Start the current never drops enough → no slot.
+    # ── Build slots: centred ±3h around each tidal extremum ───────────
+    # Renversement = extremum - 3h (avant chaque PM ou BM)
+    # Fenêtre = [extremum_précédent + 3h, extremum_suivant - 3h]
+    # En valeur absolue : start=min des deux bornes, end=max → toujours positif
     OFFSET = timedelta(hours=3)
     slots_by_day: dict[date, list[tuple[datetime, datetime, bool]]] = {}
 
@@ -312,14 +313,18 @@ def fetch_dive_slots_by_day(
         if e2_dt <= e1_dt:
             continue
 
-        start     = e1_dt + OFFSET
-        end       = e2_dt - OFFSET
         is_rising = e2_h > e1_h   # montante = BM→PM
 
-        if end <= start:
-            continue   # half-cycle trop court, pas d'étale
+        # Toujours prendre en absolu pour gérer les demi-cycles asymétriques
+        b1 = e1_dt + OFFSET
+        b2 = e2_dt - OFFSET
+        start = min(b1, b2)
+        end   = max(b1, b2)
 
-        # Assign slot to the day of the midpoint
+        # Minimum viable : 10 min (évite les créneaux anecdotiques)
+        if (end - start).total_seconds() < 600:
+            continue
+
         mid_day = (start + (end - start) / 2).date()
         slots_by_day.setdefault(mid_day, []).append((start, end, is_rising))
 
