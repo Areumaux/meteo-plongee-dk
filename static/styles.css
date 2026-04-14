@@ -179,6 +179,12 @@ body::before {
   padding-top: 12px;
   border-top: 1px solid var(--border);
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hero-bottom-row {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
@@ -706,6 +712,170 @@ body::before {
 #wp-footer a {
   color: var(--cyan);
   text-decoration: none;
+}
+
+/* ── THEME TOGGLE SWITCH ──────────────────────────────────────── */
+
+.theme-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.theme-toggle-label {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+}
+
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  cursor: pointer;
+}
+
+.theme-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.theme-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hi);
+  border-radius: 26px;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+.theme-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: transform 0.25s, background 0.25s;
+}
+
+.theme-switch input:checked + .theme-slider {
+  background: #e8f4ff;
+  border-color: #90b8d8;
+}
+
+.theme-switch input:checked + .theme-slider::before {
+  transform: translateX(20px);
+  background: #1a4a6a;
+}
+
+/* ── LIGHT THEME VARIABLES ────────────────────────────────────── */
+
+html[data-theme="light"] {
+  --bg:         #f2f5f8;
+  --bg-panel:   #ffffff;
+  --bg-surface: #eaf0f6;
+  --bg-card:    #ffffff;
+  --border:     #c8d8e8;
+  --border-hi:  #90b0c8;
+  --text:       #2a4a60;
+  --text-hi:    #0a1e2e;
+  --text-dim:   #7090a8;
+  --amber:      #b86800;
+  --amber-dim:  rgba(184,104,0,0.10);
+  --green:      #007838;
+  --green-dim:  rgba(0,120,56,0.10);
+  --red:        #c41200;
+  --red-dim:    rgba(196,18,0,0.10);
+  --cyan:       #005f7a;
+  --ok:         #007838;
+  --mid:        #b86800;
+  --bad:        #c41200;
+}
+
+html[data-theme="light"] body {
+  font-size: 1.05rem;
+}
+
+html[data-theme="light"] body::before {
+  display: none;
+}
+
+html[data-theme="light"] .hero {
+  box-shadow: 0 2px 12px rgba(0,60,100,0.08);
+  border-top-color: var(--amber);
+}
+
+html[data-theme="light"] .explain {
+  background: rgba(0,60,100,0.04);
+  border-left-color: var(--border-hi);
+}
+
+html[data-theme="light"] .metric-label {
+  background: rgba(0,60,100,0.06);
+}
+
+html[data-theme="light"] .slots {
+  background: rgba(0,60,100,0.03);
+}
+
+html[data-theme="light"] .slot-list li {
+  background: var(--bg-surface);
+}
+
+html[data-theme="light"] .snsm-banner {
+  box-shadow: 0 2px 8px rgba(0,60,100,0.06);
+}
+
+html[data-theme="light"] .snsm-logo {
+  filter: none;
+  opacity: 1;
+}
+
+/* Quality tints — light version */
+html[data-theme="light"] .quality-tint.penalty-0 { background: #e8fff2; border-color: #80d0a8; }
+html[data-theme="light"] .quality-tint.penalty-0 .metric-value { color: #006030; }
+html[data-theme="light"] .quality-tint.penalty-0 .metric-label { color: #009050; border-color: #80d0a8; background: rgba(0,100,60,0.08); }
+
+html[data-theme="light"] .quality-tint.penalty-1 { background: #f0fff6; border-color: #90d8b0; }
+html[data-theme="light"] .quality-tint.penalty-1 .metric-value { color: #007840; }
+html[data-theme="light"] .quality-tint.penalty-1 .metric-label { color: #00a060; }
+
+html[data-theme="light"] .quality-tint.penalty-2 { background: #fff8e0; border-color: #d0a040; }
+html[data-theme="light"] .quality-tint.penalty-2 .metric-value { color: #886000; }
+html[data-theme="light"] .quality-tint.penalty-2 .metric-label { color: #a07800; border-color: #d0a040; background: rgba(140,100,0,0.08); }
+
+html[data-theme="light"] .quality-tint.penalty-3 { background: #fff3d8; border-color: #d8901a; }
+html[data-theme="light"] .quality-tint.penalty-3 .metric-value { color: #a06000; }
+html[data-theme="light"] .quality-tint.penalty-3 .metric-label { color: #c07800; border-color: #d8901a; }
+
+html[data-theme="light"] .quality-tint.penalty-4 { background: #fff0e8; border-color: #e0703a; }
+html[data-theme="light"] .quality-tint.penalty-4 .metric-value { color: #b84010; }
+html[data-theme="light"] .quality-tint.penalty-4 .metric-label { color: #c05020; border-color: #e0703a; }
+
+html[data-theme="light"] .quality-tint.penalty-5 { background: #ffecec; border-color: #e03030; }
+html[data-theme="light"] .quality-tint.penalty-5 .metric-value { color: #c01010; }
+html[data-theme="light"] .quality-tint.penalty-5 .metric-label { color: #d02020; border-color: #c02020; background: rgba(180,0,0,0.08); }
+
+html[data-theme="light"] .quality-tint.penalty-6 { background: #f5eaff; border-color: #9050c0; }
+html[data-theme="light"] .quality-tint.penalty-6 .metric-value { color: #6020a0; }
+html[data-theme="light"] .quality-tint.penalty-6 .metric-label { color: #7030b0; border-color: #9050c0; }
+
+html[data-theme="light"] .tide-up   { color: #008060; }
+html[data-theme="light"] .tide-down { color: #b05000; }
+
+html[data-theme="light"] #wp-modal {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
 }
 
 /* ── RESPONSIVE ───────────────────────────────────────────────── */

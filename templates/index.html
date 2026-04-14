@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Share+Tech+Mono&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+    <script>if(localStorage.getItem('dive-theme')==='light')document.documentElement.setAttribute('data-theme','light');</script>
   </head>
   <body>
     <main class="container">
@@ -36,11 +37,20 @@
           </aside>
         </div>
         <div class="hero-bottom">
-          <div class="refresh-bar" id="refreshMeta" data-last-refresh-ms="{{ now_epoch_ms }}">
-            <p class="muted">Dernier rafraîchissement : {{ now.strftime("%d/%m/%Y %H:%M:%S") }}</p>
-            <button type="button" class="refresh-btn" id="forceRefreshBtn">Forcer le rafraîchissement</button>
+          <div class="theme-toggle-wrap">
+            <label class="theme-switch" title="Basculer mode clair / sombre" aria-label="Mode clair">
+              <input type="checkbox" id="themeToggle">
+              <span class="theme-slider"></span>
+            </label>
+            <span class="theme-toggle-label" id="themeLabel">Mode clair</span>
           </div>
-          <p class="credit">Conçu par André PiedPalmé · <a href="https://www.piedpalme.com" target="_blank" rel="noopener noreferrer">www.piedpalme.com</a></p>
+          <div class="hero-bottom-row">
+            <div class="refresh-bar" id="refreshMeta" data-last-refresh-ms="{{ now_epoch_ms }}">
+              <p class="muted">Dernier rafraîchissement : {{ now.strftime("%d/%m/%Y %H:%M:%S") }}</p>
+              <button type="button" class="refresh-btn" id="forceRefreshBtn">Forcer le rafraîchissement</button>
+            </div>
+            <p class="credit">Conçu par André PiedPalmé · <a href="https://www.piedpalme.com" target="_blank" rel="noopener noreferrer">www.piedpalme.com</a></p>
+          </div>
         </div>
       </header>
 
@@ -139,6 +149,7 @@
       </footer>
     </main>
 
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script src="{{ url_for('static', filename='carousel.js') }}"></script>
     <script src="{{ url_for('static', filename='windy_popup.js') }}"></script>
   </body>
