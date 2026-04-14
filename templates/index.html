@@ -140,31 +140,6 @@
       </section>
       {% endif %}
 
-      <section class="map-section">
-        <div class="map-wrap" id="mapWrap">
-          <iframe
-            id="diveMap"
-            class="dive-map"
-            src="https://www.google.com/maps/d/embed?mid=1N6EXor1C2PxR7APc07nHl_9cee66NCo&ll=51.07375,2.36252&z=13&basemap=terrain"
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
-          <div class="map-disclaimer" id="mapDisclaimer">
-            <div class="map-disclaimer-box">
-              <div class="md-icon">⚠</div>
-              <h3 class="md-title">Avertissement</h3>
-              <p class="md-text">Les sites représentés incluent des <strong>cimetières de guerre sous-marins</strong>. Le prélèvement de tout objet y est <strong>strictement interdit et puni par la loi</strong>. Ces données sont fournies à titre indicatif uniquement — leur utilisation relève de votre seule responsabilité. Vérifiez les autorisations d'accès et respectez la réglementation en vigueur.</p>
-              <label class="md-check">
-                <input type="checkbox" id="disclaimerCheck">
-                <span>Je confirme avoir lu et compris cet avertissement</span>
-              </label>
-              <button class="md-btn" id="disclaimerBtn" disabled>Je comprends et j'accepte</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <footer class="footer-snsm">
         <div class="snsm-banner">
           <div class="snsm-logo" role="img" aria-label="Logo SNSM"></div>
@@ -176,32 +151,9 @@
       </footer>
     </main>
 
-    <script>
-      // Restore map disclaimer acceptance
-      if (localStorage.getItem('map-disclaimer') === 'accepted') {
-        document.addEventListener('DOMContentLoaded', () => {
-          const d = document.getElementById('mapDisclaimer');
-          if (d) d.classList.add('hidden');
-        });
-      }
-    </script>
     <script src="{{ url_for('static', filename='theme.js') }}"></script>
     <script src="{{ url_for('static', filename='carousel.js') }}"></script>
     <script src="{{ url_for('static', filename='windy_popup.js') }}"></script>
     <script src="{{ url_for('static', filename='slot_popup.js') }}"></script>
-    <script>
-      (function () {
-        const check = document.getElementById('disclaimerCheck');
-        const btn   = document.getElementById('disclaimerBtn');
-        const panel = document.getElementById('mapDisclaimer');
-        if (!check || !btn || !panel) return;
-        check.addEventListener('change', () => { btn.disabled = !check.checked; });
-        btn.addEventListener('click', () => {
-          if (!check.checked) return;
-          panel.classList.add('hidden');
-          localStorage.setItem('map-disclaimer', 'accepted');
-        });
-      })();
-    </script>
   </body>
 </html>
