@@ -571,9 +571,42 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
 
         dive_slot_items = make_slot_items(slot_ranges, slot_meteo, slot_scores)
 
-        # Scientific model slots (display only, no meteo breakdown)
+        # Scientific model slots — compute scores with same meteo lookup
         sci_ranges = dive_slots_sci.get(day, [])
-        dive_slot_items_sci = make_slot_items(sci_ranges, [], [])
+        sci_scores: list[int] = []
+        sci_meteo: list[dict] = []
+        for start, end, is_rising in sci_ranges:
+            s_winds, s_dirs, s_waves = [], [], []
+            mid = start + (end - start) / 2
+            for h_dt, w in day_wind_points:
+                if start <= h_dt <= end:
+                    s_winds.append(float(w["speed"]))
+                    if w.get("dir") is not None:
+                        s_dirs.append(float(w["dir"]))
+            for h_dt, wv in day_wave_points:
+                if start <= h_dt <= end:
+                    s_waves.append(float(wv["speed"]))
+            if not s_winds and day_wind_points:
+                nw = min(day_wind_points, key=lambda p: abs((p[0] - mid).total_seconds()))
+                if abs((nw[0] - mid).total_seconds()) <= 2 * 3600:
+                    s_winds.append(float(nw[1]["speed"]))
+                    if nw[1].get("dir") is not None:
+                        s_dirs.append(float(nw[1]["dir"]))
+            if not s_waves and day_wave_points:
+                nwv = min(day_wave_points, key=lambda p: abs((p[0] - mid).total_seconds()))
+                if abs((nwv[0] - mid).total_seconds()) <= 2 * 3600:
+                    s_waves.append(float(nwv[1]["speed"]))
+            sw = max(s_winds) if s_winds else None
+            sd = mean(s_dirs) if s_dirs else None
+            swv = max(s_waves) if s_waves else None
+            raw = score_day(coef, sw, swv, sd)
+            sci_scores.append(min(100, raw + RISING_TIDE_BONUS) if is_rising else raw)
+            sci_meteo.append({
+                "wind": round(sw, 1) if sw is not None else None,
+                "dir": round(sd) if sd is not None else None,
+                "wave": round(swv, 2) if swv is not None else None,
+            })
+        dive_slot_items_sci = make_slot_items(sci_ranges, sci_meteo, sci_scores)
 
         rows.append(
             DailyDiveConditions(
