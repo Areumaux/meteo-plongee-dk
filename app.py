@@ -300,7 +300,10 @@ def fetch_dive_slots_by_day(
             "is_pm": is_pm,
         })
 
-    # ── Build slots from consecutive half-cycles ────────────────────
+    # ── Build slots: simple ±3h rule (Dr Carter / SHOM Dunkirk) ───────
+    # Start = E1 + 3h,  End = E2 - 3h
+    # If End ≤ Start the current never drops enough → no slot.
+    OFFSET = timedelta(hours=3)
     slots_by_day: dict[date, list[tuple[datetime, datetime, bool]]] = {}
 
     for i in range(len(events) - 1):
@@ -309,26 +312,16 @@ def fetch_dive_slots_by_day(
         if e2_dt <= e1_dt:
             continue
 
-        half_cycle_min = (e2_dt - e1_dt).total_seconds() / 60.0
-        hm_min = half_cycle_min / 6.0  # one tidal hour in minutes
+        start     = e1_dt + OFFSET
+        end       = e2_dt - OFFSET
+        is_rising = e2_h > e1_h   # montante = BM→PM
 
-        # E2 is PM (rising half-cycle → flot) or BM (falling → jusant)
-        e2_is_pm  = e2_h > e1_h
-        is_rising = e2_is_pm          # marée montante = BM→PM half-cycle
-        k = K_SLACK_TO_PM if e2_is_pm else K_SLACK_TO_BM
+        if end <= start:
+            continue   # half-cycle trop court, pas d'étale
 
-        t_slack = e2_dt - timedelta(minutes=k * hm_min)
-
-        # Use actual tidal range of this half-cycle for window duration
-        tidal_range = abs(e2_h - e1_h)
-
-        dur_min  = _slack_window_minutes(tidal_range)
-        half_dur = timedelta(minutes=dur_min / 2.0)
-
-        start = t_slack - half_dur
-        end   = t_slack + half_dur
-
-        slots_by_day.setdefault(t_slack.date(), []).append((start, end, is_rising))
+        # Assign slot to the day of the midpoint
+        mid_day = (start + (end - start) / 2).date()
+        slots_by_day.setdefault(mid_day, []).append((start, end, is_rising))
 
     return slots_by_day, events_by_day
 
