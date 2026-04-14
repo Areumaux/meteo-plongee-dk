@@ -10,7 +10,7 @@
   };
 
   // ── Build Windy embed URL ──────────────────────────────────────
-  function buildUrl(overlay, isoDate) {
+  function buildUrl(overlay) {
     const base = "https://embed.windy.com/embed2.html";
     const params = {
       lat:        LAT,
@@ -23,20 +23,29 @@
       product:    "ecmwf",
       message:    "true",
       marker:     "true",
+      calendar:   "now",
       type:       "map",
       location:   "coordinates",
       metricWind: "kt",
       metricTemp: "°C",
     };
-
-    if (isoDate) {
-      // Midi UTC du jour = bon compromis pour la journée de plongée
-      params.timestamp = new Date(isoDate + "T12:00:00Z").getTime();
-    } else {
-      params.calendar = "now";
-    }
-
     return `${base}?${new URLSearchParams(params).toString()}`;
+  }
+
+  // ── Seek Windy to a specific date via postMessage ──────────────
+  // Windy embed listens for { timestamp } in milliseconds.
+  // We retry a few times to make sure the player is ready.
+  function seekWindy(tsMs) {
+    let attempts = 0;
+    const send = () => {
+      try {
+        frame.contentWindow.postMessage({ timestamp: tsMs }, "*");
+      } catch (_) {}
+    };
+    // Fire at 1 s, 2 s, 3.5 s after iframe load
+    [1000, 2000, 3500].forEach((delay) => {
+      setTimeout(send, delay);
+    });
   }
 
   // ── Create popup DOM ───────────────────────────────────────────
@@ -66,7 +75,23 @@
     const cfg = CONFIGS[windyKey];
     if (!cfg) return;
     title.textContent = cfg.label;
-    frame.src = buildUrl(cfg.overlay, isoDate);
+
+    // Compute target timestamp (noon UTC of the card's date)
+    const tsMs = isoDate
+      ? new Date(isoDate + "T12:00:00Z").getTime()
+      : null;
+
+    // Update title with date hint
+    if (isoDate) {
+      const d = new Date(isoDate + "T12:00:00Z");
+      const label = d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+      title.textContent = `${cfg.label} — ${label}`;
+    }
+
+    // Load iframe, then seek to date via postMessage
+    frame.onload = () => { if (tsMs) seekWindy(tsMs); };
+    frame.src = buildUrl(cfg.overlay);
+
     overlay.classList.add("active");
     document.body.style.overflow = "hidden";
   }
