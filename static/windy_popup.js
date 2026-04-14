@@ -12,7 +12,7 @@
   // ── Build Windy embed URL ──────────────────────────────────────
   function buildUrl(overlay, isoDate) {
     const base = "https://embed.windy.com/embed2.html";
-    const p = new URLSearchParams({
+    const params = {
       lat:        LAT,
       lon:        LON,
       detailLat:  LAT,
@@ -23,13 +23,20 @@
       product:    "ecmwf",
       message:    "true",
       marker:     "true",
-      calendar:   isoDate || "now",
       type:       "map",
       location:   "coordinates",
       metricWind: "kt",
       metricTemp: "°C",
-    });
-    return `${base}?${p.toString()}`;
+    };
+
+    if (isoDate) {
+      // Midi UTC du jour = bon compromis pour la journée de plongée
+      params.timestamp = new Date(isoDate + "T12:00:00Z").getTime();
+    } else {
+      params.calendar = "now";
+    }
+
+    return `${base}?${new URLSearchParams(params).toString()}`;
   }
 
   // ── Create popup DOM ───────────────────────────────────────────
