@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import timezone, date, datetime, timedelta
 from statistics import mean
+import math
 import os
 import re
 import threading
@@ -24,6 +25,18 @@ MAREE_URL = "https://maree.info/3"
 WINDGURU_SPOT_ID = "85184"
 WINDGURU_API = "https://www.windguru.net/int/iapi.php"
 UA = {"User-Agent": "Mozilla/5.0"}
+
+# ── Tidal current model — Dunkirk calibration ─────────────────────────────
+# Based on ADCP measurements (offshore wind project) + SHOM interpolation.
+# Tune V_MORTE_EAU / V_VIVE_EAU after a few validation dives.
+V_MORTE_EAU         = 0.55   # m/s  max surface current at coeff 45 (morte-eau)
+V_VIVE_EAU          = 1.00   # m/s  max surface current at coeff 95 (vive-eau)
+V_SEUIL             = 0.30   # m/s  dive-comfort current threshold
+K_SLACK_TO_PM       = 2.5    # tidal-hours before PM  (Dunkirk asymmetric rule)
+K_SLACK_TO_BM       = 3.0    # tidal-hours before BM  (Dunkirk asymmetric rule)
+T_PREP_MIN          = 15     # min  descent + positioning allowance before slack
+_T_SEMI_DIURNAL_MIN = 745.0  # mean semi-diurnal period  (12 h 25 m) in minutes
+_OMEGA              = 2.0 * math.pi / _T_SEMI_DIURNAL_MIN  # rad / min
 
 CACHE_TTL_SECONDS = 60 * 60
 _CACHE_LOCK = threading.Lock()
@@ -193,7 +206,28 @@ def parse_h_m(token: str) -> tuple[int, int] | None:
     return int(m.group(1)), int(m.group(2))
 
 
-def fetch_dive_slots_by_day() -> dict[date, list[tuple[datetime, datetime]]]:
+def _tidal_v_max(coef: float) -> float:
+    """SHOM interpolation: max surface current speed at given coefficient."""
+    return V_MORTE_EAU + ((coef - 45.0) / 50.0) * (V_VIVE_EAU - V_MORTE_EAU)
+
+
+def _slack_window_minutes(coef: float) -> float:
+    """Duration (min) where current ≤ V_SEUIL, sinusoidal NOAA model."""
+    vmax = _tidal_v_max(coef)
+    if V_SEUIL >= vmax:
+        return _T_SEMI_DIURNAL_MIN / 2.0  # effectively unlimited
+    ratio = min(V_SEUIL / vmax, 1.0)
+    return (2.0 / _OMEGA) * math.asin(ratio)
+
+
+def fetch_dive_slots_by_day(
+    coefficients: dict[date, float],
+) -> dict[date, list[tuple[datetime, datetime]]]:
+    """
+    Compute dive windows using the Dunkirk tidal-current model:
+      - slack centre = E2 - k * HM  (k=2.5 before PM, k=3.0 before BM)
+      - window width = f(coefficient) via SHOM interpolation + NOAA sinusoid
+    """
     html = requests.get(MAREE_URL, headers=UA, timeout=20).text
     soup = BeautifulSoup(html, "html.parser")
     ref_date = parse_main_page_reference_date(soup)
@@ -201,15 +235,15 @@ def fetch_dive_slots_by_day() -> dict[date, list[tuple[datetime, datetime]]]:
     if not table or not ref_date:
         return {}
 
+    # ── Parse all tide events (datetime, height_m) ─────────────────
     events: list[tuple[datetime, float]] = []
     cursor = ref_date
     for row in table.find_all("tr")[1:]:
         cells = row.find_all(["td", "th"])
         if len(cells) < 3:
             continue
-
-        day_cell = cells[0].get_text(" ", strip=True)
-        times_cell = cells[1].get_text(" ", strip=True)
+        day_cell    = cells[0].get_text(" ", strip=True)
+        times_cell  = cells[1].get_text(" ", strip=True)
         heights_cell = cells[2].get_text(" ", strip=True)
 
         day_match = re.search(r"(\d{1,2})$", day_cell)
@@ -220,39 +254,56 @@ def fetch_dive_slots_by_day() -> dict[date, list[tuple[datetime, datetime]]]:
         if day_num < cursor.day:
             month += 1
             if month > 12:
-                month = 1
-                year += 1
+                month, year = 1, year + 1
         cursor = date(year, month, day_num)
 
-        time_tokens = [t for t in re.findall(r"\d{1,2}h\d{2}", times_cell)]
+        time_tokens  = re.findall(r"\d{1,2}h\d{2}", times_cell)
         height_tokens = [h.replace(",", ".") for h in re.findall(r"\d+,\d+m", heights_cell)]
         heights = [float(h[:-1]) for h in height_tokens]
         for tkn, h in zip(time_tokens, heights):
             hm = parse_h_m(tkn)
             if hm is None:
                 continue
-            dt = PARIS_TZ.localize(datetime(cursor.year, cursor.month, cursor.day, hm[0], hm[1]))
+            dt = PARIS_TZ.localize(
+                datetime(cursor.year, cursor.month, cursor.day, hm[0], hm[1])
+            )
             events.append((dt, h))
 
     events.sort(key=lambda x: x[0])
 
+    # ── Build slots from consecutive half-cycles ────────────────────
     slots_by_day: dict[date, list[tuple[datetime, datetime]]] = {}
+
     for i in range(len(events) - 1):
-        a_dt, _ = events[i]
-        b_dt, _ = events[i + 1]
-        if b_dt <= a_dt:
+        e1_dt, e1_h = events[i]
+        e2_dt, e2_h = events[i + 1]
+        if e2_dt <= e1_dt:
             continue
 
-        start = a_dt.replace(second=0, microsecond=0) + timedelta(hours=3)
-        end = b_dt.replace(second=0, microsecond=0) - timedelta(hours=3)
-        # If bounds invert (common on short cycles), keep the micro-window between them.
-        if end < start:
-            start, end = end, start
-        if end <= start:
-            continue
+        half_cycle_min = (e2_dt - e1_dt).total_seconds() / 60.0
+        hm_min = half_cycle_min / 6.0  # one tidal hour in minutes
 
-        d = start.date()
-        slots_by_day.setdefault(d, []).append((start, end))
+        # E2 is PM (rising) → slack before PM; E2 is BM → slack before BM
+        e2_is_pm = e2_h > e1_h
+        k = K_SLACK_TO_PM if e2_is_pm else K_SLACK_TO_BM
+
+        t_slack = e2_dt - timedelta(minutes=k * hm_min)
+
+        # Coefficient lookup: use PM's day if available, else nearest
+        coef_day = e2_dt.date() if e2_is_pm else e1_dt.date()
+        coef = (
+            coefficients.get(coef_day)
+            or coefficients.get(t_slack.date())
+            or 70.0  # neutral fallback
+        )
+
+        dur_min  = _slack_window_minutes(coef)
+        half_dur = timedelta(minutes=dur_min / 2.0)
+
+        start = t_slack - half_dur
+        end   = t_slack + half_dur
+
+        slots_by_day.setdefault(t_slack.date(), []).append((start, end))
 
     return slots_by_day
 
@@ -373,9 +424,9 @@ def french_weekday_name(d: date) -> str:
 def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
     tides = fetch_tide_coefficients()
     wind_hourly, wave_hourly = fetch_windguru_hourly()
-    dive_slots_by_day = fetch_dive_slots_by_day()
+    dive_slots_by_day = fetch_dive_slots_by_day(tides)
 
-    # On se limite aux jours où météo vent + houle existent pour éviter des scores artificiels.
+    # Only keep days where both wind and wave forecasts exist.
     weather_days = sorted({dt.date() for dt in wind_hourly.keys()} & {dt.date() for dt in wave_hourly.keys()})
     all_days = sorted(set(tides.keys()) & set(weather_days) & set(dive_slots_by_day.keys()))
     all_days = [d for d in all_days if d >= datetime.now(PARIS_TZ).date()]
@@ -386,8 +437,6 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
     today = datetime.now(PARIS_TZ).date()
     for day in all_days:
         coef = tides.get(day)
-        # Strict rule:
-        # start = tide_1 + 3h, end = tide_2 - 3h, and if conflict we keep inverse window.
         slot_ranges = dive_slots_by_day.get(day, [])
         slot_labels = [f"{s.strftime('%H:%M')} - {e.strftime('%H:%M')}" for s, e in slot_ranges]
 
