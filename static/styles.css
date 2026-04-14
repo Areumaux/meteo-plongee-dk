@@ -546,9 +546,9 @@ body::before {
 .slot-list strong { color: var(--text-hi); }
 .slot-list small { color: var(--text-dim); font-size: 0.72rem; }
 .slot-list em { font-style: normal; color: var(--amber); font-size: 0.8rem; }
-.tide-dir  { font-size: 1.3rem; font-weight: bold; line-height: 1; color: var(--text-hi); justify-self: center; }
-.tide-up   { color: var(--text-hi); }
-.tide-down { color: var(--text-hi); }
+.tide-dir  { font-size: 1.4rem !important; line-height: 1; color: #fff !important; display: flex; align-items: center; justify-content: center; min-width: 20px; }
+.tide-up   { color: #fff !important; }
+.tide-down { color: #fff !important; }
 
 /* ── TIDE EVENTS (PM/BM times on card) ───────────────────────── */
 
