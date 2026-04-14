@@ -79,7 +79,6 @@
 
             <div class="quality">{{ c.label }}</div>
             <div class="reliability">Fiabilité météo estimée: {{ c.reliability_pct }}%</div>
-            <div class="explain" title="{{ c.score_explanation }}">{{ c.score_explanation }}</div>
 
             <div class="metrics">
               <div class="metric quality-tint" data-penalty="{{ 100 - c.coef_quality }}" data-windy="currents">
@@ -132,6 +131,8 @@
               <strong>N/A</strong>
               {% endif %}
             </div>
+
+            <div class="explain">{{ c.score_explanation }}</div>
           </div>
           </article>
           {% endfor %}
