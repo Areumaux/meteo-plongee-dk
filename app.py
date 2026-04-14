@@ -29,8 +29,10 @@ UA = {"User-Agent": "Mozilla/5.0"}
 # ── Tidal current model — Dunkirk calibration ─────────────────────────────
 # Based on ADCP measurements (offshore wind project) + SHOM interpolation.
 # Tune V_MORTE_EAU / V_VIVE_EAU after a few validation dives.
-V_MORTE_EAU         = 0.55   # m/s  max surface current at coeff 45 (morte-eau)
-V_VIVE_EAU          = 1.00   # m/s  max surface current at coeff 95 (vive-eau)
+V_MORTE_EAU         = 0.55   # m/s  max surface current at amplitude RANGE_MORTE_EAU
+V_VIVE_EAU          = 1.00   # m/s  max surface current at amplitude RANGE_VIVE_EAU
+RANGE_MORTE_EAU     = 2.5    # m    tidal range (PM-BM) at morte-eau (coeff ~45)
+RANGE_VIVE_EAU      = 5.9    # m    tidal range (PM-BM) at vive-eau  (coeff ~95)
 V_SEUIL             = 0.30   # m/s  dive-comfort current threshold
 K_SLACK_TO_PM       = 2.5    # tidal-hours before PM  (Dunkirk asymmetric rule)
 K_SLACK_TO_BM       = 3.0    # tidal-hours before BM  (Dunkirk asymmetric rule)
@@ -207,14 +209,17 @@ def parse_h_m(token: str) -> tuple[int, int] | None:
     return int(m.group(1)), int(m.group(2))
 
 
-def _tidal_v_max(coef: float) -> float:
-    """SHOM interpolation: max surface current speed at given coefficient."""
-    return V_MORTE_EAU + ((coef - 45.0) / 50.0) * (V_VIVE_EAU - V_MORTE_EAU)
+def _tidal_v_max_from_range(tidal_range: float) -> float:
+    """Interpolate max current speed from actual tidal range (PM height - BM height)."""
+    t = (tidal_range - RANGE_MORTE_EAU) / (RANGE_VIVE_EAU - RANGE_MORTE_EAU)
+    t = max(0.0, min(1.0, t))  # clamp to [0, 1]
+    return V_MORTE_EAU + t * (V_VIVE_EAU - V_MORTE_EAU)
 
 
-def _slack_window_minutes(coef: float) -> float:
-    """Duration (min) where current ≤ V_SEUIL, sinusoidal NOAA model."""
-    vmax = _tidal_v_max(coef)
+def _slack_window_minutes(tidal_range: float) -> float:
+    """Duration (min) where current ≤ V_SEUIL, sinusoidal NOAA model.
+    Uses the actual tidal range of the individual half-cycle."""
+    vmax = _tidal_v_max_from_range(tidal_range)
     if V_SEUIL >= vmax:
         return _T_SEMI_DIURNAL_MIN / 2.0  # effectively unlimited
     ratio = min(V_SEUIL / vmax, 1.0)
@@ -292,15 +297,10 @@ def fetch_dive_slots_by_day(
 
         t_slack = e2_dt - timedelta(minutes=k * hm_min)
 
-        # Coefficient lookup: use PM's day if available, else nearest
-        coef_day = e2_dt.date() if e2_is_pm else e1_dt.date()
-        coef = (
-            coefficients.get(coef_day)
-            or coefficients.get(t_slack.date())
-            or 70.0  # neutral fallback
-        )
+        # Use actual tidal range of this half-cycle for window duration
+        tidal_range = abs(e2_h - e1_h)
 
-        dur_min  = _slack_window_minutes(coef)
+        dur_min  = _slack_window_minutes(tidal_range)
         half_dur = timedelta(minutes=dur_min / 2.0)
 
         start = t_slack - half_dur
