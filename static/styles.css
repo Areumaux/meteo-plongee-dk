@@ -179,7 +179,9 @@ body::before {
   padding-top: 12px;
   border-top: 1px solid var(--border);
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
@@ -189,6 +191,7 @@ body::before {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex: 1;
 }
 
 .refresh-bar {
@@ -770,69 +773,28 @@ html[data-theme="light"] #slotPopup {
   text-decoration: none;
 }
 
-/* ── THEME TOGGLE SWITCH ──────────────────────────────────────── */
+/* ── THEME TOGGLE BUTTON ──────────────────────────────────────── */
 
-.theme-toggle-wrap {
+#themeBtn {
+  background: transparent;
+  border: 1px solid var(--border-hi);
+  color: var(--text-dim);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.05rem;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  justify-content: center;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  flex-shrink: 0;
 }
 
-.theme-toggle-label {
-  font-family: "Share Tech Mono", monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  cursor: pointer;
-  user-select: none;
-}
-
-.theme-switch {
-  position: relative;
-  display: inline-block;
-  width: 46px;
-  height: 26px;
-  cursor: pointer;
-}
-
-.theme-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  position: absolute;
-}
-
-.theme-slider {
-  position: absolute;
-  inset: 0;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-hi);
-  border-radius: 26px;
-  transition: background 0.25s, border-color 0.25s;
-}
-
-.theme-slider::before {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  left: 3px;
-  top: 3px;
-  border-radius: 50%;
-  background: var(--text-dim);
-  transition: transform 0.25s, background 0.25s;
-}
-
-.theme-switch input:checked + .theme-slider {
-  background: #e8f4ff;
-  border-color: #90b8d8;
-}
-
-.theme-switch input:checked + .theme-slider::before {
-  transform: translateX(20px);
-  background: #1a4a6a;
+#themeBtn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-dim);
 }
 
 /* ── LIGHT THEME VARIABLES ────────────────────────────────────── */

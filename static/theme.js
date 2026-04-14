@@ -1,8 +1,6 @@
 (() => {
-  const KEY   = "dive-theme";
-  const html  = document.documentElement;
-  const input = document.getElementById("themeToggle");
-  const label = document.getElementById("themeLabel");
+  const KEY  = "dive-theme";
+  const html = document.documentElement;
 
   function apply(light) {
     if (light) {
@@ -10,20 +8,24 @@
     } else {
       html.removeAttribute("data-theme");
     }
-    if (label) label.textContent = light ? "Mode sombre" : "Mode clair";
-    if (input) input.checked = light;
+    const btn = document.getElementById("themeBtn");
+    if (btn) btn.textContent = light ? "☀️" : "🌙";
   }
 
   // Restore saved preference immediately (avoids flash)
   const saved = localStorage.getItem(KEY);
   apply(saved === "light");
 
-  // Toggle on click
-  if (input) {
-    input.addEventListener("change", () => {
-      const light = input.checked;
+  // Wire up button after DOM ready
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("themeBtn");
+    if (!btn) return;
+    // sync icon in case apply() ran before DOMContentLoaded
+    btn.textContent = html.hasAttribute("data-theme") ? "☀️" : "🌙";
+    btn.addEventListener("click", () => {
+      const light = !html.hasAttribute("data-theme");
       localStorage.setItem(KEY, light ? "light" : "dark");
       apply(light);
     });
-  }
+  });
 })();

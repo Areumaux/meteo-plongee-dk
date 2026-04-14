@@ -37,17 +37,11 @@
           </aside>
         </div>
         <div class="hero-bottom">
-          <div class="theme-toggle-wrap">
-            <label class="theme-switch" title="Basculer mode clair / sombre" aria-label="Mode clair">
-              <input type="checkbox" id="themeToggle">
-              <span class="theme-slider"></span>
-            </label>
-            <span class="theme-toggle-label" id="themeLabel">Mode clair</span>
-          </div>
           <div class="hero-bottom-row">
             <div class="refresh-bar" id="refreshMeta" data-last-refresh-ms="{{ now_epoch_ms }}">
               <p class="muted">Dernier rafraîchissement : {{ now.strftime("%d/%m/%Y %H:%M:%S") }}</p>
               <button type="button" class="refresh-btn" id="forceRefreshBtn">Forcer le rafraîchissement</button>
+              <button type="button" id="themeBtn" aria-label="Basculer thème">🌙</button>
             </div>
             <p class="credit">Conçu par André PiedPalmé · <a href="https://www.piedpalme.com" target="_blank" rel="noopener noreferrer">www.piedpalme.com</a></p>
           </div>
