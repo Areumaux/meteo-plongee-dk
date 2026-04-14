@@ -831,6 +831,17 @@ html[data-theme="light"] #slotPopup {
   padding: 4px 8px;
 }
 
+.slot-model-info {
+  font-family: "Share Tech Mono", monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  margin: 4px 0 5px;
+  line-height: 1.5;
+  border-left: 2px solid var(--border-hi);
+  padding-left: 6px;
+}
+
 .theme-fab {
   position: fixed;
   top: 14px;
