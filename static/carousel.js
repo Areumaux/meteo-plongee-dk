@@ -6,12 +6,16 @@
 
   const cards = () => Array.from(track.querySelectorAll(".score-card"));
 
+  // Left edge of a card expressed as a scrollLeft value within the track
+  function cardScrollLeft(card) {
+    return card.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
+  }
+
   // Index of the card whose left edge is closest to the current scroll position
   function currentIndex() {
-    const scrollLeft = track.scrollLeft;
     let best = 0, bestDist = Infinity;
     cards().forEach((card, i) => {
-      const dist = Math.abs(card.offsetLeft - scrollLeft);
+      const dist = Math.abs(cardScrollLeft(card) - track.scrollLeft);
       if (dist < bestDist) { bestDist = dist; best = i; }
     });
     return best;
@@ -21,7 +25,7 @@
     const list = cards();
     if (!list.length) return;
     const target = list[Math.max(0, Math.min(idx, list.length - 1))];
-    track.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
+    track.scrollTo({ left: cardScrollLeft(target), behavior: "smooth" });
   }
 
   prevBtn.addEventListener("click", () => goTo(currentIndex() - 1));
