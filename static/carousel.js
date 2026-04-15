@@ -4,15 +4,28 @@
   const nextBtn = document.getElementById("nextBtn");
   if (!track || !prevBtn || !nextBtn) return;
 
-  const step = () => Math.max(240, Math.round(track.clientWidth * 0.8));
+  const cards = () => Array.from(track.querySelectorAll(".score-card"));
 
-  prevBtn.addEventListener("click", () => {
-    track.scrollBy({ left: -step(), behavior: "smooth" });
-  });
+  // Index of the card whose left edge is closest to the current scroll position
+  function currentIndex() {
+    const scrollLeft = track.scrollLeft;
+    let best = 0, bestDist = Infinity;
+    cards().forEach((card, i) => {
+      const dist = Math.abs(card.offsetLeft - scrollLeft);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    });
+    return best;
+  }
 
-  nextBtn.addEventListener("click", () => {
-    track.scrollBy({ left: step(), behavior: "smooth" });
-  });
+  function goTo(idx) {
+    const list = cards();
+    if (!list.length) return;
+    const target = list[Math.max(0, Math.min(idx, list.length - 1))];
+    track.scrollTo({ left: target.offsetLeft, behavior: "smooth" });
+  }
+
+  prevBtn.addEventListener("click", () => goTo(currentIndex() - 1));
+  nextBtn.addEventListener("click", () => goTo(currentIndex() + 1));
 })();
 
 (() => {
