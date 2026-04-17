@@ -165,10 +165,14 @@ def build_score_explanation(
     return "Intermédiaire: conditions praticables mais pas optimales."
 
 
-def score_label(score: int) -> tuple[str, str]:
+def score_label(score: int, wave_m: float | None = None) -> tuple[str, str]:
+    if wave_m is not None and wave_m >= 0.8:
+        if score >= 60:
+            return "Correct", "correct"
+        return "Mauvais", "mauvais"
     if score >= 75:
         return "Idéal", "ideal"
-    if score >= 55:
+    if score >= 60:
         return "Correct", "correct"
     return "Mauvais", "mauvais"
 
@@ -549,7 +553,7 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
         wind_dir = mean(slot_dirs) if slot_dirs else None
         wave_height = max(slot_wave_maxes) if slot_wave_maxes else None
         score = round(mean(slot_scores)) if slot_scores else score_day(coef, wind_speed, wave_height, wind_dir)
-        label, css_class = score_label(score)
+        label, css_class = score_label(score, wave_height)
         reliability_pct = reliability_for_day((day - today).days)
         score_explanation = build_score_explanation(score, coef, wind_speed, wave_height, wind_dir, reliability_pct)
         coef_q, wind_q, wave_q, dir_q = criterion_quality_scores(coef, wind_speed, wave_height, wind_dir)
