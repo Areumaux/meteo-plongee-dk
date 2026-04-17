@@ -85,11 +85,12 @@ def angular_distance_deg(a: float, b: float) -> float:
 def score_day(coef: float | None, wind_kn: float | None, wave_m: float | None, wind_dir: float | None) -> int:
     coef_score = 0.5 if coef is None else 1 - clamp((coef - 20) / 100, 0, 1)
     wind_score = 0.5 if wind_kn is None else 1 - clamp(wind_kn / 25, 0, 1)
-    wave_score = 0.5 if wave_m is None else 1 - clamp(wave_m / 2.5, 0, 1)
+    # <0.5m good, 0.5m medium (~50%), 1m bad (~33%)
+    wave_score = 0.5 if wave_m is None else 1 - clamp(wave_m / 1.5, 0, 1)
     dir_score = 0.5 if wind_dir is None else 1 - clamp(angular_distance_deg(wind_dir, 180) / 180, 0, 1)
     effective_dir_score = effective_direction_score(dir_score, wind_kn)
 
-    weighted = (coef_score * 0.35) + (wind_score * 0.35) + (wave_score * 0.2) + (effective_dir_score * 0.1)
+    weighted = (coef_score * 0.30) + (wind_score * 0.30) + (wave_score * 0.30) + (effective_dir_score * 0.10)
     return round(weighted * 100)
 
 
@@ -107,7 +108,7 @@ def criterion_quality_scores(
 ) -> tuple[int, int, int, int]:
     coef_score = 0.5 if coef is None else 1 - clamp((coef - 20) / 100, 0, 1)
     wind_score = 0.5 if wind_kn is None else 1 - clamp(wind_kn / 25, 0, 1)
-    wave_score = 0.5 if wave_m is None else 1 - clamp(wave_m / 2.5, 0, 1)
+    wave_score = 0.5 if wave_m is None else 1 - clamp(wave_m / 1.5, 0, 1)
     dir_score = 0.5 if wind_dir is None else 1 - clamp(angular_distance_deg(wind_dir, 180) / 180, 0, 1)
     effective_dir_score = effective_direction_score(dir_score, wind_kn)
     return (
