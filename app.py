@@ -15,7 +15,7 @@ UTC = timezone.utc
 
 import requests
 from bs4 import BeautifulSoup
-from flask import Flask, jsonify, redirect, render_template, request
+from flask import Flask, Response, jsonify, redirect, render_template, request
 
 
 app = Flask(__name__)
@@ -711,6 +711,30 @@ def api_conditions():
             for c in conditions
         ]
     )
+
+
+SITE_URL = "https://meteo-plongee-dk.piedpalme.com"
+
+
+@app.route("/robots.txt")
+def robots():
+    content = f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n"
+    return Response(content, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    today = datetime.now(PARIS_TZ).strftime("%Y-%m-%d")
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>{SITE_URL}/</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>"""
+    return Response(xml, mimetype="application/xml")
 
 
 if __name__ == "__main__":
