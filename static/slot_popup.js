@@ -17,6 +17,10 @@
   const elWave  = document.getElementById("spWave");
   const elTide  = document.getElementById("spTide");
 
+  function hasValue(value) {
+    return value !== undefined && value !== null && value !== "";
+  }
+
   // ── Wind direction label ───────────────────────────────────────
   function dirLabel(deg) {
     if (deg === "" || deg === null || isNaN(+deg)) return "—";
@@ -62,11 +66,12 @@
     const wave   = row.dataset.wave;
     const rising = row.dataset.rising === "true";
     const range  = row.dataset.range || "";
+    const hasMeteo = hasValue(wind) || hasValue(dir) || hasValue(wave);
 
     elTitle.textContent = `Créneau  ${range}`;
-    elWind.textContent  = wind ? `${wind} nds` : "—";
-    elDir.innerHTML     = dirLabel(dir);
-    elWave.textContent  = wave ? `${wave} m`   : "—";
+    elWind.textContent  = hasValue(wind) ? `${wind} nds` : (hasMeteo ? "—" : "Indisponible");
+    elDir.innerHTML     = hasValue(dir) ? dirLabel(dir) : (hasMeteo ? "—" : "Indisponible");
+    elWave.textContent  = hasValue(wave) ? `${wave} m` : (hasMeteo ? "—" : "Indisponible");
     elTide.innerHTML    = rising
       ? `<span style="color:#4fc">↑ Montante</span>`
       : `<span style="color:#f84">↓ Descendante</span>`;

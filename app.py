@@ -707,6 +707,7 @@ def api_conditions():
                 "wave_quality": c.wave_quality,
                 "dir_quality": c.dir_quality,
                 "dive_slot_items": c.dive_slot_items,
+                "dive_slot_items_sci": c.dive_slot_items_sci,
             }
             for c in conditions
         ]
