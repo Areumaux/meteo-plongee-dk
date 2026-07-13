@@ -483,10 +483,17 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
         all_days = all_days[:limit_days]
 
     rows: list[DailyDiveConditions] = []
-    today = datetime.now(PARIS_TZ).date()
+    now_dt = datetime.now(PARIS_TZ)
+    today = now_dt.date()
+
+    def keep_forecast_slots(day: date, ranges: SlotList) -> SlotList:
+        if day != today:
+            return ranges
+        return [(start, end, is_rising) for start, end, is_rising in ranges if end > now_dt]
+
     for day in all_days:
         coef = tides.get(day)
-        slot_ranges = dive_slots_simple.get(day, [])
+        slot_ranges = keep_forecast_slots(day, dive_slots_simple.get(day, []))
         slot_labels = [f"{s.strftime('%H:%M')} - {e.strftime('%H:%M')}" for s, e, _r in slot_ranges]
 
         day_wind_points = [(h_dt, w) for h_dt, w in wind_hourly.items() if h_dt.date() == day]
@@ -577,7 +584,7 @@ def build_conditions(limit_days: int | None = 7) -> list[DailyDiveConditions]:
         dive_slot_items = make_slot_items(slot_ranges, slot_meteo, slot_scores)
 
         # Scientific model slots — compute scores with same meteo lookup
-        sci_ranges = dive_slots_sci.get(day, [])
+        sci_ranges = keep_forecast_slots(day, dive_slots_sci.get(day, []))
         sci_scores: list[int] = []
         sci_meteo: list[dict] = []
         for start, end, is_rising in sci_ranges:
