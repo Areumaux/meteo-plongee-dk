@@ -14,8 +14,8 @@
     if (toggle) toggle.checked   = light;
   }
 
-  // Apply before paint to avoid flash
-  apply(localStorage.getItem(KEY) === "light");
+  // Apply before paint to avoid flash. Light is the default unless dark was explicitly selected.
+  apply(localStorage.getItem(KEY) !== "dark");
 
   document.addEventListener("DOMContentLoaded", () => {
     // Sync in case apply() ran before DOM was ready
