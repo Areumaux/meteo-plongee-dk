@@ -167,7 +167,9 @@
                 {% if c.dive_slot_items_sci %}
                   {% for it in c.dive_slot_items_sci %}
                   <li class="slot-row"
-                      data-wind="" data-dir="" data-wave=""
+                      data-wind="{{ it.wind_kn if it.wind_kn is not none else '' }}"
+                      data-dir="{{ it.wind_dir_deg if it.wind_dir_deg is not none else '' }}"
+                      data-wave="{{ it.wave_m if it.wave_m is not none else '' }}"
                       data-rising="{{ 'true' if it.is_rising else 'false' }}"
                       data-range="{{ it.range }}"
                       title="Cliquer pour détails météo">
